@@ -1,14 +1,12 @@
 require('dotenv').config()
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT
+const express = require('express')
+const app = express()
+const mapRoutes = require('./routes/mapRoutes')
 
 app.use(express.json());
+app.use('/api/maps', mapRoutes)
 
-app.get('/', (req, res) => {
-  res.send('alutus');
-});
-
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+  console.log(`Server is running on http://localhost:${PORT}`)
+})
