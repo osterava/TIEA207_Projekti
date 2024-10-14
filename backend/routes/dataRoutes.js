@@ -3,10 +3,10 @@ const axios = require('axios');
 
 const router = express.Router();
 
-// Replace with the actual URL you want to fetch data from. Current: JSONPlaceholder API for users
-const apiUrl = 'https://jsonplaceholder.typicode.com/users';
+// Replace with the actual URL. Current: International Monetary Fund (IMF) API for government debt-to-GDP ratio
+const apiUrl = 'https://www.imf.org/external/datamapper/api/v1/GGXWDG_NGDP';
 
-router.get('/api/map', async (req, res) => {
+router.get('/api/data', async (req, res) => {
     try {
         const response = await axios.get(apiUrl);
         res.json(response.data);
@@ -16,4 +16,3 @@ router.get('/api/map', async (req, res) => {
 });
 
 module.exports = router;
-
