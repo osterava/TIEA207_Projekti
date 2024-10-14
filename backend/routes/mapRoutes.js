@@ -1,10 +1,11 @@
+require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
 
 const router = express.Router();
 
-// Replace with the actual URL you want to fetch data from. Current: JSONPlaceholder API for users
-const apiUrl = 'https://jsonplaceholder.typicode.com/users';
+// Ensure actual URL is set in .env file. Current: JSONPlaceholder API
+const apiUrl = process.env.MAP_URL;
 
 router.get('/api/map', async (req, res) => {
     try {
