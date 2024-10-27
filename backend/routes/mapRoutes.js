@@ -1,13 +1,10 @@
-require('dotenv').config()
 const express = require('express');
 const axios = require('axios');
-
 const router = express.Router();
 
-// Ensure actual URL is set in .env file. Current: JSONPlaceholder API
-const apiUrl = process.env.MAP_URL;
+const apiUrl = process.env.MAP_URL; 
 
-router.get('/api/map', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const response = await axios.get(apiUrl);
         res.json(response.data);
@@ -17,4 +14,3 @@ router.get('/api/map', async (req, res) => {
 });
 
 module.exports = router;
-

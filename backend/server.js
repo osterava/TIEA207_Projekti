@@ -9,10 +9,10 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-app.use('/', mapRoutes)
-app.use('/', dataRoute)
+app.use('/api/maps', mapRoutes)
+app.use('/api/data', dataRoute)
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })
