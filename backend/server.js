@@ -1,12 +1,14 @@
 require('dotenv').config()
 const express = require('express')
-const app = express()
+const cors = require('cors')
 const mapRoutes = require('./routes/mapRoutes')
 const dataRoute = require('./routes/dataRoutes')
-const cors = require('cors')
+
+const app = express()
 
 app.use(express.json())
 app.use(cors())
+
 app.use('/', mapRoutes)
 app.use('/', dataRoute)
 
