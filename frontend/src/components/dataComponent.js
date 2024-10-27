@@ -29,10 +29,10 @@
     
         return (
             <div>
-                <h1>Data List</h1>
-                <h2>Hakee vain tällä hetkellä Suomen datan</h2>
-                <h2> Tämä nyt vain hetkellisesti visualisoimassa, että se data oikeasti tulee fronttiin</h2>
-                <ul>
+                <h1 style = {{textAlign:'center',fontFamily:'Georgia'}}>DataList</h1>
+                <h1 style = {{textAlign:'left',fontFamily:'Georgia',marginLeft:'20px'}}>Hakee Suomen datan</h1>
+                <h2 style ={{marginLeft:'15px'}}> *Tämä nyt vain hetkellisesti visualisoimassa, että se data oikeasti tulee fronttiin*</h2>
+                <ul style={{marginLeft:'20px'}}>
                     {dataEntries.map(([year, value]) => ( 
                         <li key={year}>
                             Year: {year}, Value: {value}
