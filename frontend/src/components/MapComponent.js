@@ -1,11 +1,15 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import mapService from '../services/mapService.js'
 
 const MapComponent = () => {
-  const mapRef = useRef(null);
+  const [mapData, setMapData] = useState(null)
+  const mapRef = useRef(null)
+  
 
   useEffect(() => {
+    mapService.getMapData().then(data => setMapData(data));
     if (mapRef.current === null) {
       const map = L.map('map').setView([20, 0], 2)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -23,7 +27,11 @@ const MapComponent = () => {
     }
   }, [])
 
- return <div id="map" style={{ height: '600px' }}></div>
-}
+ return (
+ <div>
+  <div id="map" style={{ height: '600px' }}></div>
+   {mapData && <p>{mapData.message}</p>}
+ </div>
+)}
 
 export default MapComponent
