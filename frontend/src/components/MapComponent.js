@@ -72,12 +72,17 @@ const MapComponent = () => {
 
       if (mapRef.current === null) {
         const mapElement = document.getElementById('map');
+        const southWest = L.latLng(-89.98155760646617, -180),
+        northEast = L.latLng(89.99346179538875, 180);
+        const bounds = L.latLngBounds(southWest, northEast);
+
         if (mapElement) {
           const map = L.map(mapElement).setView([30, 5], 2);
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
           }).addTo(map);
 
+          map.setMaxBounds(bounds);
           map.setMinZoom(2);
           map.setMaxZoom(7);
 
