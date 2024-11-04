@@ -6,9 +6,52 @@ import populationService from '../services/popService.js'
 import gdpService from '../services/gdpService.js'
 import countries from '../data/countries.json'
 import DebtChart from './debtChart.js'
+import { getData } from '../services/debtService.js'
 
 const currentYear = new Date().getFullYear()
 var geojson;
+var defaultGeoJsonLayer;
+var heatmapGeoJsonLayer;
+
+/**
+ * Apply heatmap style based on the country's debt
+ * @param {*} feature 
+ */
+const applyHeatmapStyle = (feature) => {
+  if (!feature.properties.debt) {
+    feature.properties.debt = { '2024': 0 };
+  }
+  const debt = feature.properties.debt['2024'];
+  let fillColor;
+
+  if (debt > 100) {
+    fillColor = '#ff0d0d';
+  } else if (debt > 85) {
+    fillColor = '#ff4e11';
+  } else if (debt > 70) {
+    fillColor = '#ff8e15';
+  } else if (debt > 55) {
+    fillColor = '#fab733';
+  } else if (debt > 40) {
+    fillColor = '#acb334';
+  } else if (debt > 25) {
+    fillColor = '#69b34c';
+  } else if (debt > 10) {
+    fillColor = '#3baf4a';
+  } else if (debt > 0) {
+    fillColor = 'green';
+  } else {
+    fillColor = 'black';
+  }
+
+  return {
+    weight: 2,
+    fillColor: fillColor,
+    fillOpacity: 1,
+    color: 'white',
+    opacity: 1,
+  };
+}
 
 /**
  * Highlight function to style the selected country
@@ -31,7 +74,18 @@ function highlightFeature(e) {
  * @param {*} e 
  */
 function resetHighlight(e) {
-  geojson.resetStyle(e.target);
+  defaultGeoJsonLayer.resetStyle(e.target);
+}
+
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData) {
+  feature.properties.debt = debtData[feature.properties.adm0_a3];
+  layer.on({
+    click: () => {
+    console.log(feature);
+    setSelectedCountry(feature.properties)
+    setInfoVisible(true)
+    }
+  });
 }
 
 /**
@@ -43,6 +97,8 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
 
   layer.on({
     click: () => {
+      console.log(feature);
+      
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
 
@@ -50,7 +106,8 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
       setSelectedCountryCode(countryCode)
       
       if (countryCode) {
-        populationService.getDataByYear(2024, countryCode)
+        populationService.
+        ByYear(2024, countryCode)
         .then(data => {
           
           const regionKey = 'LP'
@@ -94,13 +151,13 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
  * Get style for the GeoJSON layer
  * @returns Style object
  */
-function style() {
+function defaultStyle() {
   return {
     fillColor: 'grey',
     weight: 2,
     opacity: 1,
     color: 'white',
-    fillOpacity: 0.7,
+    fillOpacity: 1,
   };
 }
 
@@ -111,33 +168,73 @@ const MapComponent = () => {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [selectedCountryGBDYear,setCountryGBDYear] = useState(null)
-
+  const [heatmap, setHeatmap] = useState(true);
+  const [debtData, setDebtData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
   const mapRef = useRef(null)
 
+  // Pyritään hakemaan data ennen muun koodin suorittamista
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData()
+
+        // Eristetään data, ei tarvitse aina merkata '.values.GGXWDG_NGDP'
+        var data = result.values.GGXWDG_NGDP
+        setDebtData(data)
+        setLoading(false)
+      } catch (err) {
+        console.error(err);
+        setLoading(false)
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+  // Velkadata haettu, voidaan piirtää heatmap-kartta (EI TOIMI)
+  useEffect(() => {
+    if (loading) return;
+
     mapService.getMapData().then(data => {
       setMapData(data);
 
       if (mapRef.current === null) {
         const mapElement = document.getElementById('map');
+        const southWest = L.latLng(-89.98155760646617, -200);
+        const northEast = L.latLng(89.99346179538875, 200);
+        const bounds = L.latLngBounds(southWest, northEast);
+
         if (mapElement) {
           const map = L.map(mapElement).setView([30, 5], 2);
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
           }).addTo(map)
 
-          map.setMinZoom(2)
-          map.setMaxZoom(7)
+          map.setMaxBounds(bounds);
+          map.setMinZoom(2);
+          map.setMaxZoom(7);
 
           mapRef.current = map;
+          
+          // Add GeoJSON layer with heatmap style
+          // TODO: Selvitä miksi heatmap ei toimi
+          heatmapGeoJsonLayer = L.geoJson(countries, {
+            style: applyHeatmapStyle,
+            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData)
+          }).addTo(map);
 
           // Add GeoJSON layer with event handling
-          geojson = L.geoJson(countries, {
+          defaultGeoJsonLayer = L.geoJson(countries, {
             style: style,
             onEachFeature: (feature, layer) => 
              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
             setSelectedCountryCode,setCountryGBDYear)
           }).addTo(map)
+
+          heatmapGeoJsonLayer.setStyle(applyHeatmapStyle);
         }
       }
     })
@@ -147,13 +244,25 @@ const MapComponent = () => {
         mapRef.current.remove()
         mapRef.current = null
       }
-    }
-  }, [])
+    };
+  }, [loading]);
+  
+  const toggleHeatmap = () => {
+    console.log('Toggling heatmap');
+    console.log(countries);
+    
+    heatmap ? heatmapGeoJsonLayer.bringToFront() : defaultGeoJsonLayer.bringToFront();
+    setHeatmap(!heatmap);
+  }
 
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setPopulationData(null);
+  }
+
+  if (loading) {
+    return <div>Loading...</div>; // Show loading indicator while data is being fetched
   }
 
   return (
@@ -171,6 +280,7 @@ const MapComponent = () => {
 
       {infoVisible && (
         <div
+          id="info-box"
           style={{
             width: '22%',
             height: '660px',
@@ -197,9 +307,12 @@ const MapComponent = () => {
             <p>shows the development of gross debt in relation to GDP</p>
           </div>
       )}
-
       {mapData && <p>{mapData.message}</p>}
     </div>
+    <div id="map-buttons">
+      <button onClick={toggleHeatmap}>Toggle heatmap</button>
+    </div>
+  </>
   )
 }
 
