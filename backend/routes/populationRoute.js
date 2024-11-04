@@ -1,19 +1,19 @@
-require('dotenv').config();
-const express = require('express');
-const axios = require('axios');
+require('dotenv').config()
+const express = require('express')
+const axios = require('axios')
 
-const router = express.Router();
+const router = express.Router()
 
 const apiUrl = process.env.IMF_POPULATION;
 
 router.get('/', async (req, res) => { 
     try {
-        const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl)
         res.json(response.data);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message })
     }
-});
+})
 
-module.exports = router;
+module.exports = router
