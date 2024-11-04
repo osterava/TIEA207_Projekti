@@ -18,7 +18,7 @@ app.use('/api/population', popRoute)
 app.use('/api/gdp', gdpRoute)
 app.use('/api/indicator', indicatorRoute)
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })

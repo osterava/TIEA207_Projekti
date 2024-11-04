@@ -9,4 +9,3 @@ export const getData = async () => {
 
 const dataService = { getData }
 export default dataService
-
