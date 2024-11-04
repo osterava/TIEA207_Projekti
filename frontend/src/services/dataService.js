@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseUrl = '/api/data' 
+const baseUrl = '/api/debt' 
 
 export const getData = async () => {
     const response = await axios.get(baseUrl)

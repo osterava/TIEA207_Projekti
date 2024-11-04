@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const router = express.Router();
 
-const apiUrl = process.env.IMF_DEBT;
+const apiUrl = process.env.IMF_POPULATION;
 
 router.get('/', async (req, res) => { 
     try {
