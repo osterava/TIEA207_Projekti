@@ -1,18 +1,14 @@
 import React from 'react'
-import MapComponent from './components/MapComponent'
-import DataComponent from './components/dataComponent'
-// import './App.css';
-
-const appStyle = {
-  backgroundColor: 'Beige', 
-}
+import MapComponent from './components/MapComponent.js'
+import Footer from './components/footer.js'
+import './App.css'
 
 const App = () => {
   return (
-    <div style={appStyle}>
-      <h1 style = {{textAlign:'center',fontFamily:'Georgia'}}>Velkakartta</h1>
+    <div className='app'>
+      <h1>Velkakartta</h1>
       <MapComponent />
-      <DataComponent />
+      <Footer />
     </div>
   )
 }

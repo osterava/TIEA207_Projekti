@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseUrl = '/api/debt' 
+const baseUrl = '/api/indicator' 
 
 export const getData = async () => {
     const response = await axios.get(baseUrl)

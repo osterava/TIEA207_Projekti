@@ -1,0 +1,13 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    background-color: Beige;
+  }
+  
+  h1 {
+    text-align: center;
+    font-family: Georgia, serif;
+  }
+  
