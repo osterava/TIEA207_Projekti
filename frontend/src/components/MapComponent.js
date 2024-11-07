@@ -61,7 +61,8 @@ function highlightFeature(e) {
 
   layer.setStyle({
     weight: 5,
-    fillColor: 'red',
+    // fillcolor: 'red'
+    fillColor: '#BF4342',
     fillOpacity: 1,
   });
 
@@ -151,10 +152,12 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
  */
 function defaultStyle() {
   return {
-    fillColor: 'grey',
+    //fillcolor: 'grey'
+    fillColor: '#818D92',
     weight: 2,
     opacity: 1,
-    color: 'white',
+    // color: white
+    color: '#222222',
     fillOpacity: 1,
   };
 }
@@ -268,7 +271,7 @@ const MapComponent = () => {
       <div
         id="map"
         style={{
-          height: '700px',
+          height: '600px',
           width: infoVisible ? '70%' : '100%', // Increase left margin when info box is visible
           marginLeft: infoVisible ? '25%' : '5%',
           marginRight: '5%',
@@ -277,22 +280,7 @@ const MapComponent = () => {
       ></div>
   
       {infoVisible && (
-        <div
-          id="info-box"
-          style={{
-            width: '22%',
-            height: '660px',
-            background: 'white',
-            position: 'absolute',
-            top: 0,
-            left: '0',
-            boxShadow: '2px 0 5px rgba(0,0,0,0.5)',
-            zIndex: 1000,
-            padding: '20px',
-            overflowY: 'auto',
-            marginTop: '80px',
-            marginLeft: '5px'}}
-        >
+        <div id="info-box">
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={closeInfoBox}>Close</button>
           </div>
@@ -306,7 +294,7 @@ const MapComponent = () => {
       )}
   
       {mapData && <p>{mapData.message}</p>}
-      <div id="map-buttons" style={{ marginTop: '10px' }}>
+      <div id="map-buttons">
         <button onClick={toggleHeatmap}>Toggle heatmap</button>
       </div>
     </div>

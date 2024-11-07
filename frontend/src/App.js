@@ -6,7 +6,7 @@ import './App.css'
 const App = () => {
   return (
     <div className='app'>
-      <h1>Velkakartta</h1>
+      <div class='header'><h1>| Velkakartta</h1></div>
       <MapComponent />
       <Footer />
     </div>
