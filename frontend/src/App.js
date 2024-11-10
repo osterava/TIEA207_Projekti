@@ -5,15 +5,20 @@ import Header from './components/header.js'
 import './App.css'
 
 const App = () => {
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState(2024);
+  const [heatmap, setHeatmap] = useState(false);
 
   return (
     <div className='app'>
       <Header 
-        onYearChange={(year) => {setYear(year)}}
+        year={year}
+        setYear={setYear}
+        heatmap={heatmap}
+        setHeatmap={setHeatmap}
       />
       <MapComponent 
         year={year}
+        heatmap={heatmap}
       />
       <Footer />
     </div>

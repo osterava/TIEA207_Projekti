@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Slider = ({ onYearChange }) => {
-    const [year, setYear] = useState(1990);
+const Slider = ({ year, setYear }) => {
 
     const handleChange = (event) => {
-        const newYear = event.target.value;
-        setYear(newYear);
-        onYearChange(newYear);
+        setYear(parseInt(event.target.value));
     };
 
     return (
-        <div>
+        <div style={{display: 'flex'}}>
             <input
                 type="range"
                 min="1990"
                 max="2025"
+                style={{width: '100%' }}
                 value={year}
                 onChange={handleChange}
             />

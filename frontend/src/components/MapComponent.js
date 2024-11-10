@@ -8,8 +8,8 @@ import countries from '../data/countries.json'
 import DebtChart from './debtChart.js'
 import { getData } from '../services/debtService.js'
 
-var defaultGeoJsonLayer;
-var heatmapGeoJsonLayer;
+var defaultGeoJsonLayer = null;
+var heatmapGeoJsonLayer = null;
 
 /**
  * Apply heatmap style based on the country's debt
@@ -98,6 +98,13 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
     click: () => {
       console.log(feature);
       
+      // Nollataan data, ettei näytä edellisen maan tietoja
+      setSelectedCountry(null)
+      setPopulationData(null);
+      setSelectedCountryCode(null);
+      setCountryGBDYear(null);
+
+
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
 
@@ -161,14 +168,13 @@ function defaultStyle() {
   };
 }
 
-const MapComponent = ({year}) => {
+const MapComponent = ({year, heatmap}) => {
   const [populationData, setPopulationData] = useState(null)
   const [mapData, setMapData] = useState(null)
   const [infoVisible, setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [selectedCountryGBDYear,setCountryGBDYear] = useState(null)
-  const [heatmap, setHeatmap] = useState(true);
   const [debtData, setDebtData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -176,6 +182,7 @@ const MapComponent = ({year}) => {
 
   // Pyritään hakemaan data ennen muun koodin suorittamista
   useEffect(() => {
+    if (!loading) return;
     const fetchData = async () => {
       try {
         const result = await getData()
@@ -233,9 +240,12 @@ const MapComponent = ({year}) => {
           }).addTo(map)
 
           heatmapGeoJsonLayer.setStyle(applyHeatmapStyle);
+          defaultGeoJsonLayer.setStyle(defaultStyle);
         }
       }
     })
+
+    if (defaultGeoJsonLayer) heatmap ? heatmapGeoJsonLayer.bringToFront() : defaultGeoJsonLayer.bringToFront();
 
     return () => {
       if (mapRef.current !== null) {
@@ -243,20 +253,17 @@ const MapComponent = ({year}) => {
         mapRef.current = null
       }
     };
-  }, [loading,debtData,year])
+
+  }, [loading,debtData,year,heatmap])
   
-  const toggleHeatmap = () => {
-    console.log('Toggling heatmap');
-    console.log(countries);
     
-    heatmap ? heatmapGeoJsonLayer.bringToFront() : defaultGeoJsonLayer.bringToFront();
-    setHeatmap(!heatmap);
-  }
 
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setPopulationData(null);
+    setSelectedCountryCode(null);
+    setCountryGBDYear(null);
   }
 
   if (loading) {
@@ -270,7 +277,7 @@ const MapComponent = ({year}) => {
         style={{
           height: '600px',
           width: infoVisible ? '70%' : '100%', // Increase left margin when info box is visible
-          marginLeft: infoVisible ? '25%' : '5%',
+          marginLeft: '5%',
           marginRight: '5%',
           transition: 'margin-left 0.3s ease', // Smooth transition for the left margin
         }}
@@ -291,9 +298,6 @@ const MapComponent = ({year}) => {
       )}
   
       {mapData && <p>{mapData.message}</p>}
-      <div id="map-buttons">
-        <button onClick={toggleHeatmap}>Toggle heatmap</button>
-      </div>
     </div>
   )
 }

@@ -2,15 +2,20 @@ import React from 'react';
 import Slider from './Slider';
 
 
-const Header = ({onYearChange}) => {
+const Header = ({year, setYear, heatmap, setHeatmap}) => {
+
+    const onHeatmapToggle = () => {
+        setHeatmap(!heatmap);
+    };
 
     return (
-        <header className='header'>
+        <header className='header' style={{width: '80%'}}>
             <h1>Velkakartta</h1>
             <Slider
-                onYearChange={(year) => {console.log(year); onYearChange(year)}}
+                year={year}
+                setYear={setYear}
             />
-            <button>Toggle Heatmap</button>
+            <button onClick={onHeatmapToggle} style={{margin: '10px'}}>Toggle Heatmap</button>
         </header>
     );
 };
