@@ -77,7 +77,7 @@ function resetHighlight(e) {
 }
 
 function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData) {
-  feature.properties.debt = debtData[feature.properties.adm0_a3];
+  feature.properties.debt = debtData[feature.properties.gu_a3];
   layer.on({
     click: () => {
     console.log(feature);
