@@ -15,31 +15,34 @@ var heatmapGeoJsonLayer = null;
  * Apply heatmap style based on the country's debt
  * @param {*} feature 
  */
-const applyHeatmapStyle = (feature) => {
-  if (!feature.properties.debt) {
-    feature.properties.debt = { '2024': 0 };
-  }
-  const debt = feature.properties.debt['2024'];
-  let fillColor;
+const applyHeatmapStyle = (feature, year) => {
+  console.log('Feature:', feature, 'Year:', year); // Debugging line to check values
 
-  if (debt > 100) {
-    fillColor = '#ff0d0d';
-  } else if (debt > 85) {
-    fillColor = '#ff4e11';
-  } else if (debt > 70) {
-    fillColor = '#ff8e15';
-  } else if (debt > 55) {
-    fillColor = '#fab733';
-  } else if (debt > 40) {
-    fillColor = '#acb334';
-  } else if (debt > 25) {
-    fillColor = '#69b34c';
-  } else if (debt > 10) {
-    fillColor = '#3baf4a';
-  } else if (debt > 0) {
-    fillColor = 'green';
-  } else {
+  let fillColor;
+  if (!feature.properties.debt || !feature.properties.debt[year]) {
     fillColor = 'black';
+  } else {
+    const debt = feature.properties.debt[year];
+
+    if (debt > 100) {
+      fillColor = '#ff0d0d';
+    } else if (debt > 85) {
+      fillColor = '#ff4e11';
+    } else if (debt > 70) {
+      fillColor = '#ff8e15';
+    } else if (debt > 55) {
+      fillColor = '#fab733';
+    } else if (debt > 40) {
+      fillColor = '#acb334';
+    } else if (debt > 25) {
+      fillColor = '#69b34c';
+    } else if (debt > 10) {
+      fillColor = '#3baf4a';
+    } else if (debt > 0) {
+      fillColor = 'green';
+    } else {
+      fillColor = 'black';
+    }
   }
 
   return {
@@ -76,13 +79,59 @@ function resetHighlight(e) {
   defaultGeoJsonLayer.resetStyle(e.target);
 }
 
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, debtData, year) {
   feature.properties.debt = debtData[feature.properties.gu_a3];
   layer.on({
     click: () => {
-    console.log(feature);
-    setSelectedCountry(feature.properties)
-    setInfoVisible(true)
+    console.log(debtData);
+    
+      // Nollataan data, ettei näytä edellisen maan tietoja
+      setSelectedCountry(null)
+      setPopulationData(null);
+      setSelectedCountryCode(null);
+      setCountryGBDYear(null);
+
+
+      setSelectedCountry(feature.properties)
+      setInfoVisible(true)
+
+      const countryCode = feature.properties.gu_a3
+      setSelectedCountryCode(countryCode)
+      
+      if (countryCode) {
+        populationService.getDataByYear(year, countryCode)
+        .then(data => {
+          
+          const regionKey = 'LP'
+          
+          const countryPopulation = data[regionKey] ? data[regionKey][countryCode] : undefined;
+          
+          if (countryPopulation !== undefined) {
+            setPopulationData(countryPopulation)
+          } else {
+            setPopulationData('No data available for this country')
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching population data:', error)
+          setPopulationData('Error fetching data')
+        })
+      
+        gdpService.getGDPByYear(year-1, countryCode)
+        .then(data => {
+          const regionKey='NGDPD'
+          console.log('Fetched GDP data:', data);
+            const gdpValue = data[regionKey] ? data[regionKey][countryCode] : undefined;
+            setCountryGBDYear(gdpValue || 'No data available');
+        })
+        .catch(error => {
+            console.error('Error fetching GDP data:', error);
+            setCountryGBDYear('Error fetching data');
+        })
+
+      } else {
+        console.error('Country code is undefined. Cannot fetch population data.')
+      }
     }
   });
 }
@@ -94,6 +143,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debt
  */
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year) {
 
+  // ERROR: Nopea maan vaihtaminen näyttää edellisen maan tiedot, vaikka ei pitäisi
   layer.on({
     click: () => {
       console.log(feature);
@@ -227,8 +277,9 @@ const MapComponent = ({year, heatmap}) => {
           // Add GeoJSON layer with heatmap style
           // TODO: Selvitä miksi heatmap ei toimi
           heatmapGeoJsonLayer = L.geoJson(countries, {
-            style: applyHeatmapStyle,
-            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData, year)
+            style: (feature) => applyHeatmapStyle(feature, year),
+            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
+              setSelectedCountryCode,setCountryGBDYear, debtData, year)
           }).addTo(map);
 
           // Add GeoJSON layer with event handling
@@ -238,14 +289,17 @@ const MapComponent = ({year, heatmap}) => {
              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
             setSelectedCountryCode,setCountryGBDYear, year)
           }).addTo(map)
+        }
 
-          heatmapGeoJsonLayer.setStyle(applyHeatmapStyle);
+        if (heatmap) {
+          heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year));
+          heatmapGeoJsonLayer.bringToFront();
+        } else {
           defaultGeoJsonLayer.setStyle(defaultStyle);
+          defaultGeoJsonLayer.bringToFront();
         }
       }
     })
-
-    if (defaultGeoJsonLayer) heatmap ? heatmapGeoJsonLayer.bringToFront() : defaultGeoJsonLayer.bringToFront();
 
     return () => {
       if (mapRef.current !== null) {
@@ -254,9 +308,7 @@ const MapComponent = ({year, heatmap}) => {
       }
     };
 
-  }, [loading,debtData,year,heatmap])
-  
-    
+  }, [loading,debtData, year, heatmap]);
 
   const closeInfoBox = () => {
     setInfoVisible(false)
@@ -291,7 +343,7 @@ const MapComponent = ({year, heatmap}) => {
           <h2>{selectedCountry ? selectedCountry.name : ''}</h2>
           <p>Country ID: {selectedCountryCode}</p>
           <p>Population ({year}): {populationData} million people</p>
-          <p>GDP ({year - 1}): {selectedCountryGBDYear} billion USD</p>
+          <p>GDP ({year}): {selectedCountryGBDYear} billion USD</p>
           <DebtChart countryCode={selectedCountryCode} />
           <p>Shows the development of gross debt in relation to GDP.</p>
         </div>
