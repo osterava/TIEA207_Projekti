@@ -8,7 +8,6 @@ import countries from '../data/countries.json'
 import DebtChart from './debtChart.js'
 import { getData } from '../services/debtService.js'
 
-const currentYear = new Date().getFullYear()
 var defaultGeoJsonLayer;
 var heatmapGeoJsonLayer;
 
@@ -61,7 +60,8 @@ function highlightFeature(e) {
 
   layer.setStyle({
     weight: 5,
-    fillColor: 'red',
+    // fillcolor: 'red'
+    fillColor: '#BF4342',
     fillOpacity: 1,
   });
 
@@ -92,7 +92,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debt
  * @param {*} feature 
  * @param {*} layer 
  */
-function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear) {
+function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year) {
 
   layer.on({
     click: () => {
@@ -105,7 +105,7 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
       setSelectedCountryCode(countryCode)
       
       if (countryCode) {
-        populationService.getDataByYear(2024, countryCode)
+        populationService.getDataByYear(year, countryCode)
         .then(data => {
           
           const regionKey = 'LP'
@@ -123,7 +123,7 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
           setPopulationData('Error fetching data')
         })
       
-        gdpService.getGDPByYear(currentYear-1, countryCode)
+        gdpService.getGDPByYear(year-1, countryCode)
         .then(data => {
           const regionKey='NGDPD'
           console.log('Fetched GDP data:', data);
@@ -151,15 +151,17 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
  */
 function defaultStyle() {
   return {
-    fillColor: 'grey',
+    //fillcolor: 'grey'
+    fillColor: '#818D92',
     weight: 2,
     opacity: 1,
-    color: 'white',
+    // color: white
+    color: '#222222',
     fillOpacity: 1,
   };
 }
 
-const MapComponent = () => {
+const MapComponent = ({year}) => {
   const [populationData, setPopulationData] = useState(null)
   const [mapData, setMapData] = useState(null)
   const [infoVisible, setInfoVisible] = useState(false)
@@ -191,8 +193,6 @@ const MapComponent = () => {
     fetchData();
   }, []);
 
-
-  // Velkadata haettu, voidaan piirtää heatmap-kartta (EI TOIMI)
   useEffect(() => {
     if (loading) return;
 
@@ -221,7 +221,7 @@ const MapComponent = () => {
           // TODO: Selvitä miksi heatmap ei toimi
           heatmapGeoJsonLayer = L.geoJson(countries, {
             style: applyHeatmapStyle,
-            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData)
+            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, debtData, year)
           }).addTo(map);
 
           // Add GeoJSON layer with event handling
@@ -229,7 +229,7 @@ const MapComponent = () => {
             style: defaultStyle,
             onEachFeature: (feature, layer) => 
              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
-            setSelectedCountryCode,setCountryGBDYear)
+            setSelectedCountryCode,setCountryGBDYear, year)
           }).addTo(map)
 
           heatmapGeoJsonLayer.setStyle(applyHeatmapStyle);
@@ -243,7 +243,7 @@ const MapComponent = () => {
         mapRef.current = null
       }
     };
-  }, [loading,debtData])
+  }, [loading,debtData,year])
   
   const toggleHeatmap = () => {
     console.log('Toggling heatmap');
@@ -268,7 +268,7 @@ const MapComponent = () => {
       <div
         id="map"
         style={{
-          height: '700px',
+          height: '600px',
           width: infoVisible ? '70%' : '100%', // Increase left margin when info box is visible
           marginLeft: infoVisible ? '25%' : '5%',
           marginRight: '5%',
@@ -277,36 +277,21 @@ const MapComponent = () => {
       ></div>
   
       {infoVisible && (
-        <div
-          id="info-box"
-          style={{
-            width: '22%',
-            height: '660px',
-            background: 'white',
-            position: 'absolute',
-            top: 0,
-            left: '0',
-            boxShadow: '2px 0 5px rgba(0,0,0,0.5)',
-            zIndex: 1000,
-            padding: '20px',
-            overflowY: 'auto',
-            marginTop: '80px',
-            marginLeft: '5px'}}
-        >
+        <div id="info-box">
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={closeInfoBox}>Close</button>
           </div>
           <h2>{selectedCountry ? selectedCountry.name : ''}</h2>
           <p>Country ID: {selectedCountryCode}</p>
-          <p>Population ({currentYear}): {populationData} million people</p>
-          <p>GDP ({currentYear - 1}): {selectedCountryGBDYear} billion USD</p>
+          <p>Population ({year}): {populationData} million people</p>
+          <p>GDP ({year - 1}): {selectedCountryGBDYear} billion USD</p>
           <DebtChart countryCode={selectedCountryCode} />
           <p>Shows the development of gross debt in relation to GDP.</p>
         </div>
       )}
   
       {mapData && <p>{mapData.message}</p>}
-      <div id="map-buttons" style={{ marginTop: '10px' }}>
+      <div id="map-buttons">
         <button onClick={toggleHeatmap}>Toggle heatmap</button>
       </div>
     </div>
