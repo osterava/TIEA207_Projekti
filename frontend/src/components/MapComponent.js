@@ -7,6 +7,19 @@ import gdpService from '../services/gdpService.js'
 import countries from '../data/countries.json'
 import DebtChart from './debtChart.js'
 import { getData } from '../services/debtService.js'
+import { debounce } from 'lodash'
+
+/**
+ * Debugattavaa:
+ * vuoden vaihtaminen päivittää kartan, mutta ei päivitä maan tietoja
+ * vuoden vaihtaminen esim. 2019 -> 2011, ohjelma jää vuodelle 2015 
+ * -> ei renderöi VIIMEISINTÄ vuotta, vaan jonkin vuoden, jonka aloitti renderöimään aiemmin
+ * | Täytyy selvittää syy, miksi vuoden päivittyminen sekoittaa layerit (useEffect kesken?) 
+ * Maan nopea valitseminen edellisen valinnan jälkeen sekoittaa maiden tiedot
+ * -> Konsolista näkee "Fetched GDP data väärältä maalta viimeiseksi valitun maan sijaan"
+ * | Täytyy ehkä ladata debtDatan mukaisesti ladata kaikki data MapComponenttin, jotta pyynnöt eivät sekoitu
+ * TL;DR: API data pitää ehkä ladata suoraan MapComponenttiin,  
+ */
 
 var defaultGeoJsonLayer = null;
 var heatmapGeoJsonLayer = null;
@@ -143,7 +156,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
  */
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year) {
 
-  // ERROR: Nopea maan vaihtaminen näyttää edellisen maan tiedot, vaikka ei pitäisi
   layer.on({
     click: () => {
       console.log(feature);
@@ -226,11 +238,15 @@ const MapComponent = ({year, heatmap}) => {
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [selectedCountryGBDYear,setCountryGBDYear] = useState(null)
   const [debtData, setDebtData] = useState(null);
+  // Lisäys mallia näin:
+  // const [popData, setPopData] = useState(null);
+  // const [gdpData, setGDPData] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const mapRef = useRef(null)
 
   // Pyritään hakemaan data ennen muun koodin suorittamista
+  // TODO: debtDatan mukaisesti populointi ja gdp datan haku ja asettaminen 
   useEffect(() => {
     if (!loading) return;
     const fetchData = async () => {
@@ -291,15 +307,19 @@ const MapComponent = ({year, heatmap}) => {
           }).addTo(map)
         }
 
-        if (heatmap) {
-          heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year));
-          heatmapGeoJsonLayer.bringToFront();
-        } else {
-          defaultGeoJsonLayer.setStyle(defaultStyle);
-          defaultGeoJsonLayer.bringToFront();
-        }
+        debounceHeatmap();
       }
     })
+
+    const debounceHeatmap = debounce(() => {
+      if (heatmap) {
+        heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year));
+        heatmapGeoJsonLayer.bringToFront();
+      } else {
+        defaultGeoJsonLayer.setStyle(defaultStyle);
+        defaultGeoJsonLayer.bringToFront();
+      }
+    });
 
     return () => {
       if (mapRef.current !== null) {
