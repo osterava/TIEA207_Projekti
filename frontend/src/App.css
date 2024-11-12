@@ -46,7 +46,7 @@ h1 {
 
 #info-box {
   width: 22%;
-  height: 660px;
+  height: 44.1%;
   background: #FFFFFF;
   color: #2A2B2A;
   position: absolute;
@@ -56,7 +56,7 @@ h1 {
   z-index: 1000;
   padding: 20px;
   overflow-y: auto;
-  margin-top: 80px;
+  margin-top: 20.5%;
   margin-left: 5px;
 }
 
