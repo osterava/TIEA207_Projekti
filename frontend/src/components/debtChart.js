@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
-import { getDebtData } from '../services/debtService.js';
+import React, { useEffect, useState } from 'react'
+import { Line } from 'react-chartjs-2'
+import { getDebtData } from '../services/debtService.js'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -10,37 +10,39 @@ import {
     Title,
     Tooltip,
     Legend,
-} from 'chart.js';
+} from 'chart.js'
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
 const DebtChart = ({ countryCode }) => {
-    const [debtData, setDebtData] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [debtData, setDebtData] = useState({})
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
         const fetchData = async () => {
-            if (!countryCode) return;
+            if (!countryCode) return
             try {
-                const data = await getDebtData(countryCode);
-                setDebtData(data);
+                setLoading(true)
+                const data = await getDebtData(countryCode)
+                setDebtData(data)
             } catch (error) {
-                console.error('Error fetching debt data:', error);
+                console.error('Error fetching debt data:', error)
+                setError('Failed to load debt data')
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
+        }
 
-        fetchData();
-    }, [countryCode]);
-
+        fetchData()
+    }, [countryCode])
 
     const chartData = {
-        labels: Object.keys(debtData), // Vuosiluvut
+        labels: debtData && Object.keys(debtData),
         datasets: [
             {
-                label: 'General Government Gross Debt (millions)',
-                data: Object.values(debtData), // Velan arvot
+                label: 'General Government Gross Debt (% per GDP)',
+                data: debtData && Object.values(debtData),
                 fill: false,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 tension: 0.1,
@@ -48,7 +50,6 @@ const DebtChart = ({ countryCode }) => {
         ],
     };
 
-    // Kaavion asetukset
     const options = {
         responsive: true,
         scales: {
@@ -61,11 +62,11 @@ const DebtChart = ({ countryCode }) => {
             y: {
                 title: {
                     display: true,
-                    text: 'Debt in Millions',
+                    text: 'Debt in Percentage',
                 },
                 ticks: {
                     callback: function (value) {
-                        return value / 1000000 + 'M'; // Näytetään miljoonina
+                        return value + '%';
                     },
                 },
             },
@@ -78,11 +79,15 @@ const DebtChart = ({ countryCode }) => {
     };
 
     if (loading) {
-        return <p>Loading data...</p>;
+        return <p>Loading data...</p>
     }
 
-    if (Object.keys(debtData).length === 0) {
-        return <p>No debt data available for this country.</p>;
+    if (error) {
+        return <p>{error}</p>
+    }
+
+    if (!debtData || Object.keys(debtData).length === 0) {
+        return <p>No debt data available for this country.</p>
     }
 
     return (
@@ -90,7 +95,7 @@ const DebtChart = ({ countryCode }) => {
             <h2>{countryCode} General Government Gross Debt</h2>
             <Line data={chartData} options={options} />
         </div>
-    );
-};
+    )
+}
 
-export default DebtChart;
+export default DebtChart

@@ -10,7 +10,6 @@ router.get('/', async (req, res) => {
     try {
         const response = await axios.get(apiUrl);
         res.json(response.data);
-        console.log(response.data);
         
     } catch (error) {
         console.error(error);
