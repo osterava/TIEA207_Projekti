@@ -35,35 +35,6 @@ h1 {
   color: #2A2B2A;
   font-weight: 500;
 }
-
-.map-container {
-    display: flex;
-    width: 100%;
-    position: relative;
-  }
-  
-  /* Map element itself */
-  #map {
-    height: calc(60vh - 100px); /* Adjust based on your design */
-    width: 100%;
-    transition: margin-left 0.3s ease, margin-right 0.3s ease, width 0.3s ease, height 0.3s ease;
-    background-color: lightgray; /* Ensure visibility */
-  }
-  
-  /* Map styles when InfoBox is visible */
-  .map-with-info {
-    width: 70%;
-    margin-left: 26%;
-    margin-right: 5%;
-  }
-  
-  /* Map styles when InfoBox is not visible */
-  .map-without-info {
-    width: 100%;
-    margin-left: 10%;
-    margin-right: 10%;
-  }
-
 #info-box {
   width: 20vw;
   height: 52vh;
