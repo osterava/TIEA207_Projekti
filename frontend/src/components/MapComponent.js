@@ -5,10 +5,9 @@ import mapService from '../services/mapService.js'
 import populationService from '../services/popService.js'
 import gdpService from '../services/gdpService.js'
 import countries from '../data/countries.json'
-import DebtChart from './debtChart.js'
+import InfoBox from './infoBox.js'
 import { getData } from '../services/debtService.js'
 import { debounce } from 'lodash'
-
 /**
  * Debugattavaa:
  * vuoden vaihtaminen päivittää kartan, mutta ei päivitä maan tietoja
@@ -324,7 +323,7 @@ const MapComponent = ({year, heatmap}) => {
           defaultGeoJsonLayer = L.geoJson(countries, {
             style: defaultStyle,
             onEachFeature: (feature, layer) => 
-             onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
+            onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
             setSelectedCountryCode,setCountryGBDYear, year)
           }).addTo(map)
         }
@@ -373,31 +372,28 @@ const MapComponent = ({year, heatmap}) => {
         id="map"
         style={{
           height: '60vh',
-          // Muutetaan kartan kokoa ja marginaaleja kun infoboxi näkyvillä. TODO: etsi sopivat arvot
-          width: infoVisible ? '70%' : '100%', 
+          width: infoVisible ? '70%' : '100%',
           marginLeft: infoVisible ? '26%' : '10%',
           marginRight: infoVisible ? '5%' : '10%',
           transition: 'margin-left 0.3s ease',
         }}
       ></div>
-  
+
       {infoVisible && (
-        <div id="info-box">
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={closeInfoBox}>Close</button>
-          </div>
-          <h2>{selectedCountry ? selectedCountry.name : ''}</h2>
-          <p>Country ID: {selectedCountryCode}</p>
-          <p>Population ({year}): {populationData} million people</p>
-          <p>GDP ({year}): {selectedCountryGBDYear} billion USD</p>
-          <DebtChart countryCode={selectedCountryCode} />
-          <p>Shows the development of gross debt in relation to GDP.</p>
-        </div>
+        <InfoBox
+          selectedCountry={selectedCountry}
+          populationData={populationData}
+          selectedCountryGBDYear={selectedCountryGBDYear}
+          selectedCountryCode={selectedCountryCode}
+          closeInfoBox={closeInfoBox}
+          year={year}
+        />
       )}
-  
+
       {mapData && <p>{mapData.message}</p>}
     </div>
   )
 }
 
 export default MapComponent
+

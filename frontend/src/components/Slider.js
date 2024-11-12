@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
-
 const Slider = ({ year, setYear }) => {
 
     
     const handleChange = (event) => {
         setYear(parseInt(event.target.value));
-    };
+    }
 
     return (
         <div style={{display: 'flex'}}>
@@ -21,7 +18,7 @@ const Slider = ({ year, setYear }) => {
             />
             <span>{year}</span>
         </div>
-    );
-};
+    )
+}
 
 export default Slider;
