@@ -10,6 +10,7 @@ const Header = ({year, setYear, heatmap, setHeatmap}) => {
 
     return (
         <header className='header'>
+            <h1>| Velkakartta</h1>
             <h1>Velkakartta</h1>
             <Slider
                 year={year}

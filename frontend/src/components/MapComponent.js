@@ -341,17 +341,21 @@ const MapComponent = ({year, heatmap}) => {
   if (loading) {
     return <div>Loading...</div>; // Show loading indicator while data is being fetched
   }
-
+  
+  /**
+   * Bugia: harmaita kohtia jää karttaan infoboxin sulkemisen jälkeen, saattaa olla vain livetestatessa css muuttaessa
+   */
   return (
     <div style={{ display: 'flex', width: '100%' }}>
       <div
         id="map"
         style={{
-          height: '600px',
-          width: infoVisible ? '70%' : '100%', // Increase left margin when info box is visible
-          marginLeft: infoVisible ? '25%' : '5%',
-          marginRight: '5%',
-          transition: 'margin-left 0.3s ease', // Smooth transition for the left margin
+          height: '60vh',
+          // Muutetaan kartan kokoa ja marginaaleja kun infoboxi näkyvillä. TODO: etsi sopivat arvot
+          width: infoVisible ? '70%' : '100%', 
+          marginLeft: infoVisible ? '26%' : '10%',
+          marginRight: infoVisible ? '5%' : '10%',
+          transition: 'margin-left 0.3s ease',
         }}
       ></div>
   

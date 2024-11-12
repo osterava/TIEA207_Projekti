@@ -11,11 +11,11 @@ const Slider = ({ year, setYear }) => {
     return (
         <div style={{display: 'flex'}}>
             <input
+                id="slider"
                 type="range"
                 min="1990"
                 max="2025"
                 aria-label={`Year slider from 1990 to 2025`}
-                style={{width: '100%' }}
                 value={year}
                 onChange={handleChange}
             />
