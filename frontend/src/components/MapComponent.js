@@ -29,32 +29,31 @@ var heatmapGeoJsonLayer = null;
  * @param {*} feature 
  */
 const applyHeatmapStyle = (feature, year) => {
-  console.log('Feature:', feature, 'Year:', year); // Debugging line to check values
+  console.log('Feature:', feature, 'Year:', year) // Debugging line to check values
 
-  let fillColor;
-  if (!feature.properties.debt || !feature.properties.debt[year]) {
-    fillColor = 'black';
-  } else {
-    const debt = feature.properties.debt[year];
+  let fillColor = 'black'
+
+  if (feature && feature.properties && feature.properties.debt && feature.properties.debt[year] !== undefined) {
+    const debt = feature.properties.debt[year]
 
     if (debt > 100) {
-      fillColor = '#ff0d0d';
+      fillColor = '#ff0d0d'
     } else if (debt > 85) {
-      fillColor = '#ff4e11';
+      fillColor = '#ff4e11'
     } else if (debt > 70) {
-      fillColor = '#ff8e15';
+      fillColor = '#ff8e15'
     } else if (debt > 55) {
-      fillColor = '#fab733';
+      fillColor = '#fab733'
     } else if (debt > 40) {
-      fillColor = '#acb334';
+      fillColor = '#acb334'
     } else if (debt > 25) {
-      fillColor = '#69b34c';
+      fillColor = '#69b34c'
     } else if (debt > 10) {
-      fillColor = '#3baf4a';
+      fillColor = '#3baf4a'
     } else if (debt > 0) {
-      fillColor = 'green';
+      fillColor = 'green'
     } else {
-      fillColor = 'black';
+      fillColor = 'black'
     }
   }
 
@@ -93,7 +92,19 @@ function resetHighlight(e) {
 }
 
 function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, debtData, year) {
-  feature.properties.debt = debtData[feature.properties.gu_a3];
+  
+  if (!debtData || !feature || !feature.properties) {
+    console.error('Missing debt data or feature properties');
+    return;
+  }
+
+  const debt = debtData[feature.properties.gu_a3];
+  if (debt) {
+    feature.properties.debt = debt;
+  } else {
+    console.error('Debt data not available for country', feature.properties.gu_a3);
+  }
+  
   layer.on({
     click: () => {
     console.log(debtData);
@@ -113,40 +124,37 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
       
       if (countryCode) {
         populationService.getDataByYear(year, countryCode)
-        .then(data => {
-          
-          const regionKey = 'LP'
-          
-          const countryPopulation = data[regionKey] ? data[regionKey][countryCode] : undefined;
-          
-          if (countryPopulation !== undefined) {
-            setPopulationData(countryPopulation)
-          } else {
-            setPopulationData('No data available for this country')
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching population data:', error)
-          setPopulationData('Error fetching data')
-        })
+          .then(data => {
+            const regionKey = 'LP';
+            const countryPopulation = data[regionKey] ? data[regionKey][countryCode] : undefined
       
-        gdpService.getGDPByYear(year-1, countryCode)
-        .then(data => {
-          const regionKey='NGDPD'
-          console.log('Fetched GDP data:', data);
-            const gdpValue = data[regionKey] ? data[regionKey][countryCode] : undefined;
-            setCountryGBDYear(gdpValue || 'No data available');
-        })
-        .catch(error => {
-            console.error('Error fetching GDP data:', error);
-            setCountryGBDYear('Error fetching data');
-        })
-
+            if (countryPopulation !== undefined) {
+              setPopulationData(countryPopulation)
+            } else {
+              setPopulationData('No data available for this country')
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching population data:', error)
+            setPopulationData('Error fetching data')
+          });
+      
+        gdpService.getGDPByYear(year - 1, countryCode)
+          .then(data => {
+            const regionKey = 'NGDPD';
+            console.log('Fetched GDP data:', data)
+            const gdpValue = data[regionKey] ? data[regionKey][countryCode] : undefined
+            setCountryGBDYear(gdpValue || 'No data available')
+          })
+          .catch(error => {
+            console.error('Error fetching GDP data:', error)
+            setCountryGBDYear('Error fetching data')
+          })
       } else {
         console.error('Country code is undefined. Cannot fetch population data.')
       }
     }
-  });
+  })
 }
 
 /**
@@ -155,62 +163,76 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
  * @param {*} layer 
  */
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year) {
+  const { gu_a3: countryCode, name: countryName } = feature.properties;
 
   layer.on({
     click: () => {
       console.log(feature);
-      
-      // Nollataan data, ettei näytä edellisen maan tietoja
-      setSelectedCountry(null)
-      setPopulationData(null);
-      setSelectedCountryCode(null);
-      setCountryGBDYear(null);
 
+      // Reset previous data
+      resetData();
 
-      setSelectedCountry(feature.properties)
-      setInfoVisible(true)
+      // Set selected country data
+      setSelectedCountry(feature.properties);
+      setInfoVisible(true);
+      setSelectedCountryCode(countryCode);
 
-      const countryCode = feature.properties.gu_a3
-      setSelectedCountryCode(countryCode)
-      
-      if (countryCode) {
-        populationService.getDataByYear(year, countryCode)
-        .then(data => {
-          
-          const regionKey = 'LP'
-          
-          const countryPopulation = data[regionKey] ? data[regionKey][countryCode] : undefined;
-          
-          if (countryPopulation !== undefined) {
-            setPopulationData(countryPopulation)
-          } else {
-            setPopulationData('No data available for this country')
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching population data:', error)
-          setPopulationData('Error fetching data')
-        })
-      
-        gdpService.getGDPByYear(year-1, countryCode)
-        .then(data => {
-          const regionKey='NGDPD'
-          console.log('Fetched GDP data:', data);
-            const gdpValue = data[regionKey] ? data[regionKey][countryCode] : undefined;
-            setCountryGBDYear(gdpValue || 'No data available');
-        })
-        .catch(error => {
-            console.error('Error fetching GDP data:', error);
-            setCountryGBDYear('Error fetching data');
-        })
-
-      } else {
-        console.error('Country code is undefined. Cannot fetch population data.')
+      if (!countryCode) {
+        console.error('Country code is undefined. Cannot fetch population or GDP data.');
+        return;
       }
+
+      fetchCountryData(countryCode, year);
     },
     mouseover: highlightFeature,
     mouseout: resetHighlight,
   });
+
+  function resetData() {
+    setSelectedCountry(null);
+    setPopulationData(null);
+    setSelectedCountryCode(null);
+    setCountryGBDYear(null);
+  }
+
+  async function fetchCountryData(countryCode, year) {
+    try {
+      // Fetch population data
+      const populationData = await fetchPopulationData(countryCode, year);
+      setPopulationData(populationData);
+
+      // Fetch GDP data
+      const gdpData = await fetchGDPData(countryCode, year);
+      setCountryGBDYear(gdpData);
+    } catch (error) {
+      console.error('Error fetching country data:', error);
+      setPopulationData('Error fetching data');
+      setCountryGBDYear('Error fetching data');
+    }
+  }
+
+  async function fetchPopulationData(countryCode, year) {
+    try {
+      const data = await populationService.getDataByYear(year, countryCode);
+      const regionKey = 'LP';
+      return data[regionKey] ? data[regionKey][countryCode] : 'No data available for this country';
+    } catch (error) {
+      console.error('Error fetching population data:', error);
+      return 'Error fetching data';
+    }
+  }
+
+  async function fetchGDPData(countryCode, year) {
+    try {
+      const data = await gdpService.getGDPByYear(year - 1, countryCode);
+      const regionKey = 'NGDPD';
+      const gdpValue = data[regionKey] ? data[regionKey][countryCode] : 'No data available';
+      return gdpValue;
+    } catch (error) {
+      console.error('Error fetching GDP data:', error);
+      return 'Error fetching data';
+    }
+  }
 }
 
 
@@ -237,7 +259,7 @@ const MapComponent = ({year, heatmap}) => {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [selectedCountryGBDYear,setCountryGBDYear] = useState(null)
-  const [debtData, setDebtData] = useState(null);
+  const [debtData, setDebtData] = useState(null)
   // Lisäys mallia näin:
   // const [popData, setPopData] = useState(null);
   // const [gdpData, setGDPData] = useState(null);
