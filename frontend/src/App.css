@@ -9,23 +9,22 @@
 }
 
 .header {
-  width: 100%;
+  width: 100vw;
   background-color: #F7F6F3;
   text-align: center;
-  /*border-bottom: solid 2px;
-  border-color: #f7934c;*/ 
-  margin-bottom: 8vh;
+  margin-bottom: 5vh;
 }
 
 .footer {
   background-color: #F7F6F3;
-  /* background-color: #818D92; */
   color: #2A2B2A; 
   text-align: center;
-  padding: 1%;
-  position: relative; 
-  width: 100%;
-  margin-top: 8vh;
+  padding-bottom: 2vh;
+  padding-top: 2vh;
+  /*position: relative*/
+  position: absolute;
+  bottom: 0;
+  width: 100vw;
 }
 
 h1 {
@@ -41,25 +40,30 @@ h1 {
 #map {
   border: 2px solid;
   border-color: #2A2B2A;
-  margin-right: '5%';
 }
 
 #info-box {
-  width: 22%;
-  height: 660px;
+  width: 20vw;
+  height: 56vh;
   background: #FFFFFF;
   color: #2A2B2A;
   position: absolute;
-  top: 0;
+  top: 20vh;
   left: 0;
   box-shadow: 2px 0 5px rgba(0,0,0,0.5);
   z-index: 1000;
-  padding: 20px;
+  padding: 2%;
   overflow-y: auto;
-  margin-top: 80px;
-  margin-left: 5px;
+  margin-left: 1vw;
 }
 
 .map-buttons {
   margin-top: 10px;
+}
+
+#slider {
+  width: 80vw;
+  margin-left: 10vw;
+  margin-right: 1vw;
+  margin-bottom: 1vh;
 }
