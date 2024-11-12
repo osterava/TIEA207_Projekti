@@ -36,19 +36,41 @@ h1 {
   font-weight: 500;
 }
 
-
-#map {
-  border: 2px solid;
-  border-color: #2A2B2A;
-}
+.map-container {
+    display: flex;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Map element itself */
+  #map {
+    height: calc(60vh - 100px); /* Adjust based on your design */
+    width: 100%;
+    transition: margin-left 0.3s ease, margin-right 0.3s ease, width 0.3s ease, height 0.3s ease;
+    background-color: lightgray; /* Ensure visibility */
+  }
+  
+  /* Map styles when InfoBox is visible */
+  .map-with-info {
+    width: 70%;
+    margin-left: 26%;
+    margin-right: 5%;
+  }
+  
+  /* Map styles when InfoBox is not visible */
+  .map-without-info {
+    width: 100%;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
 
 #info-box {
   width: 20vw;
-  height: 56vh;
+  height: 52vh;
   background: #FFFFFF;
   color: #2A2B2A;
   position: absolute;
-  top: 20vh;
+  top: 18vh;
   left: 0;
   box-shadow: 2px 0 5px rgba(0,0,0,0.5);
   z-index: 1000;
