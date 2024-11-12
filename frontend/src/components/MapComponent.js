@@ -349,7 +349,7 @@ const MapComponent = ({year, heatmap}) => {
         style={{
           height: '600px',
           width: infoVisible ? '70%' : '100%', // Increase left margin when info box is visible
-          marginLeft: '5%',
+          marginLeft: infoVisible ? '25%' : '5%',
           marginRight: '5%',
           transition: 'margin-left 0.3s ease', // Smooth transition for the left margin
         }}
