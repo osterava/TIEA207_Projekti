@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import { getDebtData } from '../services/debtService.js'
+import { getTotalDebtData } from '../services/totalDebtService.js'
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -16,6 +17,7 @@ ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, T
 
 const DebtChart = ({ countryCode }) => {
     const [debtData, setDebtData] = useState({})
+    const [totalDebtData, setTotalDebtData] = useState({})
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -25,7 +27,9 @@ const DebtChart = ({ countryCode }) => {
             try {
                 setLoading(true)
                 const data = await getDebtData(countryCode)
+                const totalData = await getTotalDebtData(countryCode)
                 setDebtData(data)
+                setTotalDebtData(totalData)
             } catch (error) {
                 console.error('Error fetching debt data:', error)
                 setError('Failed to load debt data')
@@ -37,8 +41,12 @@ const DebtChart = ({ countryCode }) => {
         fetchData()
     }, [countryCode])
 
+    const labels = debtData && Object.keys(debtData)
+
+    const filteredTotalDebtData = totalDebtData ? labels.map(year => totalDebtData[year] || null) : []
+
     const chartData = {
-        labels: debtData && Object.keys(debtData),
+        labels: labels,
         datasets: [
             {
                 label: 'General Government Gross Debt (% per GDP)',
@@ -47,8 +55,15 @@ const DebtChart = ({ countryCode }) => {
                 borderColor: 'rgba(75, 192, 192, 1)',
                 tension: 0.1,
             },
+            {
+                label: 'Total Debt (% per GDP)',
+                data: filteredTotalDebtData,
+                fill: false,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                tension: 0.1,
+            },
         ],
-    };
+    }
 
     const options = {
         responsive: true,
@@ -87,6 +102,10 @@ const DebtChart = ({ countryCode }) => {
     }
 
     if (!debtData || Object.keys(debtData).length === 0) {
+        return <p>No debt data available for this country.</p>
+    }
+
+    if (!totalDebtData || Object.keys(debtData).length === 0) {
         return <p>No debt data available for this country.</p>
     }
 
