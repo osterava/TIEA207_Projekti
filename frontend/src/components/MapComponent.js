@@ -70,7 +70,7 @@ const applyHeatmapStyle = (feature, year) => {
  * @param {*} e 
  */
 function highlightFeature(e) {
-  var layer = e.target;
+  var layer = e.target
 
   layer.setStyle({
     weight: 5,
@@ -79,7 +79,7 @@ function highlightFeature(e) {
     fillOpacity: 1,
   });
 
-  layer.bringToFront();
+  layer.bringToFront()
 }
 
 /**
@@ -87,21 +87,21 @@ function highlightFeature(e) {
  * @param {*} e 
  */
 function resetHighlight(e) {
-  defaultGeoJsonLayer.resetStyle(e.target);
+  defaultGeoJsonLayer.resetStyle(e.target)
 }
 
 function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, debtData, year) {
   
   if (!debtData || !feature || !feature.properties) {
-    console.error('Missing debt data or feature properties');
+    console.error('Missing debt data or feature properties')
     return;
   }
 
-  const debt = debtData[feature.properties.gu_a3];
+  const debt = debtData[feature.properties.gu_a3]
   if (debt) {
-    feature.properties.debt = debt;
+    feature.properties.debt = debt
   } else {
-    console.error('Debt data not available for country', feature.properties.gu_a3);
+    console.error('Debt data not available for country', feature.properties.gu_a3)
   }
   
   layer.on({
@@ -110,9 +110,9 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
     
       // Nollataan data, ettei näytä edellisen maan tietoja
       setSelectedCountry(null)
-      setPopulationData(null);
-      setSelectedCountryCode(null);
-      setCountryGBDYear(null);
+      setPopulationData(null)
+      setSelectedCountryCode(null)
+      setCountryGBDYear(null)
 
 
       setSelectedCountry(feature.properties)
@@ -166,70 +166,62 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
 
   layer.on({
     click: () => {
-      console.log(feature);
-
-      // Reset previous data
-      resetData();
-
-      // Set selected country data
-      setSelectedCountry(feature.properties);
-      setInfoVisible(true);
-      setSelectedCountryCode(countryCode);
-
+      resetData()
+      setSelectedCountry(feature.properties)
+      setInfoVisible(true)
+      setSelectedCountryCode(countryCode)
       if (!countryCode) {
-        console.error('Country code is undefined. Cannot fetch population or GDP data.');
-        return;
+        console.error('Country code is undefined. Cannot fetch population or GDP data.')
+        return
       }
 
-      fetchCountryData(countryCode, year);
+      fetchCountryData(countryCode, year)
     },
     mouseover: highlightFeature,
     mouseout: resetHighlight,
   });
 
   function resetData() {
-    setSelectedCountry(null);
-    setPopulationData(null);
-    setSelectedCountryCode(null);
-    setCountryGBDYear(null);
+    setSelectedCountry(null)
+    setPopulationData(null)
+    setSelectedCountryCode(null)
+    setCountryGBDYear(null)
   }
 
   async function fetchCountryData(countryCode, year) {
     try {
-      // Fetch population data
-      const populationData = await fetchPopulationData(countryCode, year);
-      setPopulationData(populationData);
+      const populationData = await fetchPopulationData(countryCode, year)
+      setPopulationData(populationData)
+      const gdpData = await fetchGDPData(countryCode, year)
+      setCountryGBDYear(gdpData)
 
-      // Fetch GDP data
-      const gdpData = await fetchGDPData(countryCode, year);
-      setCountryGBDYear(gdpData);
     } catch (error) {
-      console.error('Error fetching country data:', error);
-      setPopulationData('Error fetching data');
-      setCountryGBDYear('Error fetching data');
+      console.error('Error fetching country data:', error)
+      setPopulationData('Error fetching data')
+      setCountryGBDYear('Error fetching data')
     }
   }
 
   async function fetchPopulationData(countryCode, year) {
     try {
-      const data = await populationService.getDataByYear(year, countryCode);
-      const regionKey = 'LP';
-      return data[regionKey] ? data[regionKey][countryCode] : 'No data available for this country';
+      const data = await populationService.getDataByYear(year, countryCode)
+      const regionKey = 'LP'
+      return data[regionKey] ? data[regionKey][countryCode] : 'No data available for this country'
     } catch (error) {
-      console.error('Error fetching population data:', error);
-      return 'Error fetching data';
+      console.error('Error fetching population data:', error)
+      return 'Error fetching data'
     }
   }
 
   async function fetchGDPData(countryCode, year) {
     try {
-      const data = await gdpService.getGDPByYear(year - 1, countryCode);
-      const regionKey = 'NGDPD';
-      const gdpValue = data[regionKey] ? data[regionKey][countryCode] : 'No data available';
-      return gdpValue;
+      const data = await gdpService.getGDPByYear(year - 1, countryCode)
+      const regionKey = 'NGDPD'
+      const gdpValue = data[regionKey] ? data[regionKey][countryCode] : 'No data available'
+      return gdpValue
     } catch (error) {
-      console.error('Error fetching GDP data:', error);
-      return 'Error fetching data';
+      console.error('Error fetching GDP data:', error)
+      return 'Error fetching data'
     }
   }
 }
@@ -262,7 +254,7 @@ const MapComponent = ({year, heatmap}) => {
   // Lisäys mallia näin:
   // const [popData, setPopData] = useState(null);
   // const [gdpData, setGDPData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
   
   const mapRef = useRef(null)
 
@@ -279,37 +271,37 @@ const MapComponent = ({year, heatmap}) => {
         setDebtData(data)
         setLoading(false)
       } catch (err) {
-        console.error(err);
+        console.error(err)
         setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    if (loading) return;
+    if (loading) return
 
     mapService.getMapData().then(data => {
-      setMapData(data);
+      setMapData(data)
 
       if (mapRef.current === null) {
-        const mapElement = document.getElementById('map');
-        const southWest = L.latLng(-89.98155760646617, -200);
-        const northEast = L.latLng(89.99346179538875, 200);
-        const bounds = L.latLngBounds(southWest, northEast);
+        const mapElement = document.getElementById('map')
+        const southWest = L.latLng(-89.98155760646617, -200)
+        const northEast = L.latLng(89.99346179538875, 200)
+        const bounds = L.latLngBounds(southWest, northEast)
 
         if (mapElement) {
-          const map = L.map(mapElement).setView([30, 5], 2);
+          const map = L.map(mapElement).setView([30, 5], 2)
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
           }).addTo(map)
 
-          map.setMaxBounds(bounds);
-          map.setMinZoom(2);
-          map.setMaxZoom(7);
+          map.setMaxBounds(bounds)
+          map.setMinZoom(2)
+          map.setMaxZoom(7)
 
-          mapRef.current = map;
+          mapRef.current = map
           
           // Add GeoJSON layer with heatmap style
           // TODO: Selvitä miksi heatmap ei toimi
@@ -317,7 +309,7 @@ const MapComponent = ({year, heatmap}) => {
             style: (feature) => applyHeatmapStyle(feature, year),
             onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
               setSelectedCountryCode,setCountryGBDYear, debtData, year)
-          }).addTo(map);
+          }).addTo(map)
 
           // Add GeoJSON layer with event handling
           defaultGeoJsonLayer = L.geoJson(countries, {
@@ -328,17 +320,17 @@ const MapComponent = ({year, heatmap}) => {
           }).addTo(map)
         }
 
-        debounceHeatmap();
+        debounceHeatmap()
       }
     })
 
     const debounceHeatmap = debounce(() => {
       if (heatmap) {
-        heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year));
-        heatmapGeoJsonLayer.bringToFront();
+        heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year))
+        heatmapGeoJsonLayer.bringToFront()
       } else {
-        defaultGeoJsonLayer.setStyle(defaultStyle);
-        defaultGeoJsonLayer.bringToFront();
+        defaultGeoJsonLayer.setStyle(defaultStyle)
+        defaultGeoJsonLayer.bringToFront()
       }
     });
 
@@ -349,18 +341,18 @@ const MapComponent = ({year, heatmap}) => {
       }
     };
 
-  }, [loading,debtData, year, heatmap]);
+  }, [loading,debtData, year, heatmap])
 
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
-    setPopulationData(null);
-    setSelectedCountryCode(null);
-    setCountryGBDYear(null);
+    setPopulationData(null)
+    setSelectedCountryCode(null)
+    setCountryGBDYear(null)
   }
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading indicator while data is being fetched
+    return <div>Loading...</div>
   }
   
   /**
@@ -372,8 +364,8 @@ const MapComponent = ({year, heatmap}) => {
         id="map"
         style={{
           height: '60vh',
-          width: infoVisible ? '70%' : '100%',
-          marginLeft: infoVisible ? '26%' : '10%',
+          width: infoVisible ? '60%' : '100%',
+          marginLeft: infoVisible ? '36%' : '10%',
           marginRight: infoVisible ? '5%' : '10%',
           transition: 'margin-left 0.3s ease',
         }}
