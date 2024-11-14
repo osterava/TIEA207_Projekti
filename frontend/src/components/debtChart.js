@@ -42,6 +42,8 @@ const DebtChart = ({ countryCode }) => {
     }, [countryCode])
 
     const labels = debtData && Object.keys(debtData)
+    
+    if (!debtData) return <p> No debt data available for this country </p>
 
     const filteredTotalDebtData = totalDebtData ? labels.map(year => totalDebtData[year] || null) : []
 
