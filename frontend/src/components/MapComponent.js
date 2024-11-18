@@ -163,7 +163,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
  */
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year) {
   const { gu_a3: countryCode, name: countryName } = feature.properties
-
   layer.on({
     click: () => {
       resetData()
@@ -174,7 +173,6 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
         console.error('Country code is undefined. Cannot fetch population or GDP data.')
         return
       }
-
       fetchCountryData(countryCode, year)
     },
     mouseover: highlightFeature,
@@ -293,9 +291,9 @@ const MapComponent = ({ year, heatmap }) => {
 
         if (mapElement) {
           const map = L.map(mapElement).setView([30, 5], 2)
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-          }).addTo(map)
+          // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          // attribution: '© OpenStreetMap contributors',
+          // }).addTo(map)
 
           map.setMaxBounds(bounds)
           map.setMinZoom(2)
@@ -365,9 +363,9 @@ const MapComponent = ({ year, heatmap }) => {
         style={{
           height: '60vh',
           width: infoVisible ? '60%' : '100%',
-          marginLeft: infoVisible ? '36%' : '10%',
-          marginRight: infoVisible ? '5%' : '10%',
-          transition: 'margin-left 0.3s ease',
+          marginLeft: infoVisible ? '36%' : '5%',
+          marginRight: infoVisible ? '5%' : '5%',
+          transition: 'width 0.3s ease, margin-left 0.3s ease, margin-right 0.3s ease',
         }}
       ></div>
 
