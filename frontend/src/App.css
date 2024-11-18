@@ -54,6 +54,12 @@ h1 {
   margin-top: 10px;
 }
 
+#map {
+  border: 2px solid;
+  border-color: #2A2B2A;
+  margin-right: '5%';
+}
+
 #slider {
   width: 80vw;
   margin-left: 10vw;
