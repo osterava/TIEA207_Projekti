@@ -6,12 +6,12 @@ import './App.css'
 import Search from './components/search.js'
 
 const App = () => {
-  const [year, setYear] = useState(2024);
-  const [heatmap, setHeatmap] = useState(false);
+  const [year, setYear] = useState(2024)
+  const [heatmap, setHeatmap] = useState(false)
 
   return (
     <div className='app'>
-      <Header 
+      <Header
         year={year}
         setYear={setYear}
         heatmap={heatmap}
@@ -27,4 +27,4 @@ const App = () => {
   )
 }
 
-export default App;
+export default App

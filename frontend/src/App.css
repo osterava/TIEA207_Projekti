@@ -36,7 +36,7 @@ h1 {
   font-weight: 500;
 }
 #info-box {
-  width: 20vw;
+  width: 30vw;
   height: 52vh;
   background: #FFFFFF;
   color: #2A2B2A;
@@ -52,6 +52,12 @@ h1 {
 
 .map-buttons {
   margin-top: 10px;
+}
+
+#map {
+  border: 2px solid;
+  border-color: #2A2B2A;
+  margin-right: '5%';
 }
 
 #slider {
