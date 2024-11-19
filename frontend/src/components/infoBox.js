@@ -1,6 +1,16 @@
 import React from 'react'
 import DebtChart from './debtChart'
 
+/**
+ * Displays detailed information about a selected country, including population, GDP,
+ * and public debt data over time, with an embedded debt-to-GDP chart.
+ * @param {object} selectedCountry The selected country object, containing the country name and other details.
+ * @param {number} populationData The population of the selected country in millions.
+ * @param {number} selectedCountryGBDYear The GDP of the selected country in billions of USD for the selected year.
+ * @param {string} selectedCountryCode The code for the selected country, used for fetching related data.
+ * @param {function} closeInfoBox A function to close the info box when the close button is clicked.
+ * @param {string} year The year for which population and GDP data is displayed.
+ */
 const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, selectedCountryCode, closeInfoBox, year }) => {
   return (
     <div id="info-box">
