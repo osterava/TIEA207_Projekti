@@ -194,7 +194,8 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
 
       if (mapRef.current && feature.geometry) {
         const bounds = L.geoJSON(feature.geometry).getBounds()
-        const center = bounds.getCenter()
+        let center = bounds.getCenter()
+        center = L.latLng(center.lat, center.lng + 50)
         mapRef.current.setView(center, 4)
       }
       fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
