@@ -194,12 +194,9 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
 
       if (mapRef.current && feature.geometry) {
         const bounds = L.geoJSON(feature.geometry).getBounds()
-        mapRef.current.fitBounds(bounds, {
-          padding: [5, 5],
-        })
+        const center = bounds.getCenter()
+        mapRef.current.setView(center, 4)
       }
-
-      // Use the common fetch function
       fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
     }
   })
@@ -230,12 +227,10 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPo
 
       if (mapRef.current && feature.geometry) {
         const bounds = L.geoJSON(feature.geometry).getBounds()
-        mapRef.current.fitBounds(bounds, {
-          padding: [5, 5],
-        })
+        let center = bounds.getCenter()
+        center = L.latLng(center.lat, center.lng + 50)
+        mapRef.current.setView(center, 4)
       }
-
-      // Use the common fetch function
       fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
     },
     mouseover: highlightFeature,
@@ -300,7 +295,7 @@ const MapComponent = ({ year, heatmap }) => {
     }
 
     fetchData()
-  }, [loading])
+  }, [loading,year])
 
   useEffect(() => {
     if (loading) return
@@ -320,7 +315,7 @@ const MapComponent = ({ year, heatmap }) => {
           // attribution: '© OpenStreetMap contributors',
           // }).addTo(map)
 
-          map.setMinZoom(2)
+          map.setMinZoom(3)
           map.setMaxZoom(7)
 
           mapRef.current = map
@@ -367,7 +362,7 @@ const MapComponent = ({ year, heatmap }) => {
 
   const resetMapView = () => {
     if (mapRef.current) {
-      const southWest = L.latLng(-89.98155760646617, -200)
+      const southWest = L.latLng(-65.98155760646617, -200)
       const northEast = L.latLng(89.99346179538875, 200)
       const bounds = L.latLngBounds([southWest, northEast])
       mapRef.current.fitBounds(bounds)
