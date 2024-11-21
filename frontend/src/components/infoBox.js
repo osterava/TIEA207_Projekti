@@ -14,7 +14,7 @@ import DebtChart from './debtChart'
 const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, selectedCountryCode, closeInfoBox, year, cgDebt, centralGovDebt, publicDebt }) => {
 
   var formatted_cgDebt = 'Data unavailable', formatted_pop = 'Data unavailable', formatted_gdp = 'Data unavailable'
-  if (cgDebt) formatted_cgDebt = `${cgDebt.toFixed(3)} billion USD`
+  if (cgDebt) formatted_cgDebt = `${(cgDebt.toFixed(3)/100)*selectedCountryGBDYear} billion USD`
   else if (year > 2022) formatted_cgDebt = 'Data only available until 2022'
   if (populationData) formatted_pop = `${populationData.toFixed(3)} million people`
   if (selectedCountryGBDYear) formatted_gdp = `${selectedCountryGBDYear.toFixed(3)} billion USD`
@@ -28,7 +28,7 @@ const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, sele
       <p><strong> Country ID: </strong>{selectedCountryCode}</p>
       <p><strong> Population ({year}): </strong>{formatted_pop}</p>
       <p><strong> GDP ({year}): </strong>{formatted_gdp}</p>
-      <p><strong> Central Government Debt ({year}): </strong>{formatted_cgDebt}</p>
+      <p><strong> Total Government debt ({year}): </strong>{formatted_cgDebt}</p>
       <DebtChart
         countryCode={selectedCountryCode}
         centralGovDebt={centralGovDebt}
