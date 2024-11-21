@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import mapService from '../services/mapService.js'
 import countries from '../data/countries.json'
 import InfoBox from './infoBox.js'
 import { getData as getPublicDebtData } from '../services/publicDebtService.js'
 import { getData as getGDPData } from '../services/gdpService.js'
 import { getData as getPopulationData } from '../services/popService.js'
 import { getData as getCGDebtData } from '../services/cgDebtService.js'
+import { getMapData } from '../services/mapService.js'
 import { debounce } from 'lodash'
 
 
@@ -35,8 +35,6 @@ var heatmapGeoJsonLayer = null
  * @param {number} year The selected year to display debt data.
  */
 const applyHeatmapStyle = (feature, year) => {
-  console.log('Feature:', feature, 'Year:', year) // Debugging line to check values
-
   let fillColor = 'black'
 
   if (feature && feature.properties && feature.properties.debt && feature.properties.debt[year] !== undefined) {
@@ -120,7 +118,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
   if (debt) {
     feature.properties.debt = debt
   } else {
-    console.error('Debt data not available for country', feature.properties.gu_a3)
+    // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
   }
 
   layer.on({
@@ -208,7 +206,7 @@ const MapComponent = ({ year, heatmap }) => {
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
   const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
-  const [mapData, setMapData] = useState(null)
+  //const [mapData, setMapData] = useState(null)
   const [infoVisible,   setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
@@ -245,6 +243,10 @@ const MapComponent = ({ year, heatmap }) => {
         setCentralGovernmentDebtData(data)
         console.log('Central government debt data:', data)
 
+        const rawMapData = await getMapData()
+        //setMapData(rawMapData)
+        console.log('Map data:', rawMapData)
+
         setLoading(false)
       } catch (err) {
         console.error(err)
@@ -253,59 +255,49 @@ const MapComponent = ({ year, heatmap }) => {
     }
 
     fetchData()
-  }, [loading,year])
+  }, [loading])
 
   useEffect(() => {
     if (loading) return
 
-    mapService.getMapData().then(data => {
-      setMapData(data)
+    if (mapRef.current === null) {
+      const mapElement = document.getElementById('map')
+      const southWest = L.latLng(-89.98155760646617, -200)
+      const northEast = L.latLng(89.99346179538875, 200)
+      const bounds = L.latLngBounds(southWest, northEast)
 
-      if (mapRef.current === null) {
-        const mapElement = document.getElementById('map')
-        const southWest = L.latLng(-89.98155760646617, -200)
-        const northEast = L.latLng(89.99346179538875, 200)
-        const bounds = L.latLngBounds(southWest, northEast)
+      if (mapElement) {
+        const map = L.map(mapElement).setView([30, 5], 2)
 
-        if (mapElement) {
-          const map = L.map(mapElement).setView([30, 5], 2)
+        // Jostain syystä hajoittaa koodin: 'el is not defined' tms.
+        //map.setMinZoom(3)
+        //map.setMaxZoom(7)
 
-          // Jostain syystä hajoittaa koodin: 'el is not defined' tms.
-          //map.setMinZoom(3)
-          //map.setMaxZoom(7)
+        mapRef.current = map
 
-          mapRef.current = map
+        // Add GeoJSON layer with heatmap style
+        // TODO: Selvitä miksi heatmap ei toimi
+        heatmapGeoJsonLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year),
+          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+            setSelectedCountryCode, publicDebtData, year, mapRef)
+        }).addTo(map)
 
-          // Add GeoJSON layer with heatmap style
-          // TODO: Selvitä miksi heatmap ei toimi
-          heatmapGeoJsonLayer = L.geoJson(countries, {
-            style: (feature) => applyHeatmapStyle(feature, year),
-            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-              setSelectedCountryCode, publicDebtData, year, mapRef)
-          }).addTo(map)
-
-          // Add GeoJSON layer with event handling
-          defaultGeoJsonLayer = L.geoJson(countries, {
-            style: defaultStyle,
-            onEachFeature: (feature, layer) =>
-              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible,
-                setSelectedCountryCode, year, mapRef)
-          }).addTo(map)
-        }
-
-        debounceHeatmap()
+        // Add GeoJSON layer with event handling
+        defaultGeoJsonLayer = L.geoJson(countries, {
+          style: defaultStyle,
+          onEachFeature: (feature, layer) =>
+            onEachFeature(feature, layer, setSelectedCountry, setInfoVisible,
+              setSelectedCountryCode, year, mapRef)
+        }).addTo(map)
       }
-    })
+    }
 
-    const debounceHeatmap = debounce(() => {
-      if (heatmap) {
-        heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year))
-        heatmapGeoJsonLayer.bringToFront()
-      } else {
-        defaultGeoJsonLayer.setStyle(defaultStyle)
-        defaultGeoJsonLayer.bringToFront()
-      }
-    })
+    if (heatmap) {
+      heatmapGeoJsonLayer.bringToFront()
+    } else {
+      defaultGeoJsonLayer.bringToFront()
+    }
 
     return () => {
       if (mapRef.current !== null) {
@@ -313,8 +305,7 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-
-  }, [loading,publicDebtData, year, heatmap, populationData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
   const resetMapView = () => {
     if (mapRef.current) {
@@ -366,7 +357,7 @@ const MapComponent = ({ year, heatmap }) => {
         />
       )}
 
-      {mapData && <p>{mapData.message}</p>}
+      {/*mapData && <p>{mapData.message}</p>*/}
     </div>
   )
 }

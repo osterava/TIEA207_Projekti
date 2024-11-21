@@ -21,8 +21,7 @@
   text-align: center;
   padding-bottom: 2vh;
   padding-top: 2vh;
-  /*position: relative*/
-  position: absolute;
+  position: relative;
   bottom: 0;
   width: 100vw;
 }
@@ -71,4 +70,18 @@ h1 {
   margin-left: 10vw;
   margin-right: 1vw;
   margin-bottom: 1vh;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #053a5f;
+  height: 0.5rem;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #053a5f;
+  height: 0.5rem;
 }

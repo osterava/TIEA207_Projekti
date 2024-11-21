@@ -15,6 +15,7 @@ const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, sele
 
   var formatted_cgDebt = 'Data unavailable', formatted_pop = 'Data unavailable', formatted_gdp = 'Data unavailable'
   if (cgDebt) formatted_cgDebt = `${cgDebt.toFixed(3)} billion USD`
+  else if (year > 2022) formatted_cgDebt = 'Data only available until 2022'
   if (populationData) formatted_pop = `${populationData.toFixed(3)} million people`
   if (selectedCountryGBDYear) formatted_gdp = `${selectedCountryGBDYear.toFixed(3)} billion USD`
 
