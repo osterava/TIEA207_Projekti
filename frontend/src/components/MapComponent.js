@@ -8,7 +8,7 @@ import { getData as getGDPData } from '../services/gdpService.js'
 import { getData as getPopulationData } from '../services/popService.js'
 import { getData as getCGDebtData } from '../services/cgDebtService.js'
 import { getMapData } from '../services/mapService.js'
-import { debounce } from 'lodash'
+import { getGGDebtData } from '../services/publicDebtService.js'
 
 
 /**
@@ -108,13 +108,18 @@ function resetHighlight(e) {
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, publicDebtData, year, mapRef) {
-  if (!publicDebtData || !feature || !feature.properties) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, publicDebtData, ggDebtData, mapRef) {
+  if (!publicDebtData || !feature || !feature.properties || !ggDebtData) {
     console.error('Missing debt data or feature properties')
     return
   }
 
-  const debt = publicDebtData[feature.properties.gu_a3]
+  var debt = publicDebtData[feature.properties.gu_a3]
+  for (var year in ggDebtData[feature.properties.gu_a3]) {
+    if (debt[year] === undefined) {
+      debt[year] = ggDebtData[feature.properties.gu_a3][year]
+    }
+  }
   if (debt) {
     feature.properties.debt = debt
   } else {
@@ -203,10 +208,11 @@ function defaultStyle() {
  */
 const MapComponent = ({ year, heatmap }) => {
   const [publicDebtData, setPublicDebtData] = useState(null)
+  const [ggDebtData, setGGDebtData] = useState(null)
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
   const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
-  //const [mapData, setMapData] = useState(null)
+  //const [mapData, setMapData] = useState(null) // Ilmeisesti jsonplaceholderin dataa palvelimen puolella....
   const [infoVisible,   setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
@@ -214,7 +220,6 @@ const MapComponent = ({ year, heatmap }) => {
 
   const mapRef = useRef(null)
 
-  // TODO: debtDatan mukaisesti gdp datan haku ja asettaminen
   useEffect(() => {
     if (!loading) return
     const fetchData = async () => {
@@ -247,6 +252,11 @@ const MapComponent = ({ year, heatmap }) => {
         //setMapData(rawMapData)
         console.log('Map data:', rawMapData)
 
+        const ggDebtData = await getGGDebtData()
+        data = ggDebtData.values.GG_DEBT_GDP
+        setGGDebtData(data)
+        console.log('General government debt data (2):', data)
+
         setLoading(false)
       } catch (err) {
         console.error(err)
@@ -276,11 +286,11 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = map
 
         // Add GeoJSON layer with heatmap style
-        // TODO: Selvitä miksi heatmap ei toimi
+
         heatmapGeoJsonLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, year, mapRef)
+            setSelectedCountryCode, publicDebtData, ggDebtData, mapRef)
         }).addTo(map)
 
         // Add GeoJSON layer with event handling
@@ -305,7 +315,7 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData])
 
   const resetMapView = () => {
     if (mapRef.current) {

@@ -7,6 +7,7 @@ const popRoute = require('./routes/populationRoute')
 const gdpRoute = require('./routes/gdpRoute')
 const totalDebtRoute = require('./routes/totalDebtRoute')
 const indicatorRoute = require('./routes/indicatorRoute')
+const ggRoute = require('./routes/ggDebtRoute')
 
 const app = express()
 
@@ -37,6 +38,7 @@ app.use('/api/total_debt', totalDebtRoute)
 app.use('/api/population', popRoute)
 app.use('/api/gdp', gdpRoute)
 app.use('/api/indicator', indicatorRoute)
+app.use('/api/gg_debt', ggRoute)
 
 // Set the port to either the environment variable or default to 3001
 const PORT = process.env.PORT || 3001
