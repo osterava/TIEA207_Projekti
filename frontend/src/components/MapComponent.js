@@ -385,19 +385,11 @@ const MapComponent = ({ year, heatmap }) => {
 
   /**
    * Bugia: harmaita kohtia jää karttaan infoboxin sulkemisen jälkeen, saattaa olla vain livetestatessa css muuttaessa
+   * <div style={{ display: 'flex', width: '100%' }}></div>
    */
   return (
-    <div style={{ display: 'flex', width: '100%' }}>
-      <div
-        id="map"
-        style={{
-          height: '60vh',
-          width: infoVisible ? '60%' : '100%',
-          marginLeft: infoVisible ? '36%' : '5%',
-          marginRight: infoVisible ? '5%' : '5%',
-          transition: 'width 0.3s ease, margin-left 0.3s ease, margin-right 0.3s ease',
-        }}
-      ></div>
+    <div className='midwrapper'>
+      <div id='map'/>
 
       {infoVisible && (
         <InfoBox

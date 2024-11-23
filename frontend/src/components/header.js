@@ -1,5 +1,6 @@
 import React from 'react'
 import Slider from './Slider'
+import HeatmapButton from './HeatmapButton'
 
 /**
  * The Header component contains the title, a year slider, and a button to toggle the heatmap display.
@@ -11,13 +12,6 @@ import Slider from './Slider'
  */
 const Header = ({ year, setYear, heatmap, setHeatmap }) => {
 
-  /**
-   * Toggles the heatmap display between true and false when the button is clicked.
-   */
-  const onHeatmapToggle = () => {
-    setHeatmap(!heatmap)
-  }
-
   return (
     <header className='header'>
       <h1>DebtMap</h1>
@@ -25,7 +19,10 @@ const Header = ({ year, setYear, heatmap, setHeatmap }) => {
         year={year}
         setYear={setYear}
       />
-      <button onClick={onHeatmapToggle} style={{ margin: '10px' }}>Toggle Heatmap</button>
+      <HeatmapButton
+        heatmap={heatmap}
+        setHeatmap={setHeatmap}
+      />
     </header>
   )
 }
