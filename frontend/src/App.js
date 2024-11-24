@@ -24,8 +24,10 @@ const App = () => {
         heatmap={heatmap}
         setHeatmap={setHeatmap}
       />
-      <Search/>
-      <MapComponent 
+      <Search
+        year={year}
+      />
+      <MapComponent
         year={year}
         heatmap={heatmap}
       />

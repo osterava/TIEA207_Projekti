@@ -417,6 +417,12 @@ const MapComponent = ({ year, heatmap }) => {
       {mapData && <p>{mapData.message}</p>}
     </div>
   )
+
 }
+
+
+
+
+
 
 export default MapComponent
