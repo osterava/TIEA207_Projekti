@@ -389,7 +389,9 @@ const MapComponent = ({ year, heatmap }) => {
    */
   return (
     <div className='midwrapper'>
-      <div id='map'/>
+      <div id='map' style={{ width: infoVisible ? '60vw' : '90vw',
+        transition: 'width 0.3s ease'
+      }}/>
 
       {infoVisible && (
         <InfoBox
