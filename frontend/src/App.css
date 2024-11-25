@@ -1,29 +1,142 @@
+/* Portrait Mode */
+@media (orientation: portrait) {
+  #mapContainer {
+    flex-direction: column-reverse !important;
+  }
+
+  #info-box {
+    width: 100% !important;
+    height: fit-content !important;
+    flex-direction: row !important;
+    justify-content: space-evenly !important;
+  }
+
+  #info-box.hidden {
+    width: 100% !important;
+    height: 0 !important;
+  }
+
+  #map {
+    flex: 1 !important;
+    width: 90% !important;
+    justify-self: center !important;
+    align-self: center !important;
+  }
+
+  canvas {
+    width: 50vw !important;
+    height: 25vh !important;
+  }
+
+  .header {
+    max-height: 16vh !important;
+    min-height: 16vh !important;
+  }
+
+  .footer {
+    max-height: 8vh !important;
+    min-height: 8vh !important;
+  }
+}
+
+/* Landscape Mode */
+@media (orientation: landscape) {
+  #mapContainer {
+    flex-direction: row-reverse !important;
+  }
+
+  #info-box {
+    width: 30% !important;
+    height: fit-content !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+  }
+
+  #info-box.hidden {
+    width: 0 !important;
+    opacity: 0 !important;
+    height: 100% !important;
+  }
+
+  #map {
+    flex: 1 !important;
+    width: auto !important;
+    height: auto !important;
+    justify-self: stretch !important;
+    align-self: stretch !important;
+  }
+
+  canvas {
+    width: 25vw !important;
+    height: 40vh !important;
+  }
+
+  .header {
+    height: fit-content !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #sliderWrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .header div {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  .footer {
+    max-height: 10vh !important;
+    min-height: 10vh !important;
+  }
+}
+
+/* Global Styles */
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
 .app {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0;
+  padding: 0;
   background-color: #FFFFFF;
-  /*Muistilista: beige */
-  /* #222222 #FFFFFF #7D84B2 #BF4342 #F7934C */
 }
 
+/* Header and Footer Adjustments */
 .header {
   width: 100vw;
+  height: 20%;
+  min-height: fit-content;
   background-color: #F7F6F3;
   text-align: center;
-  margin-bottom: 5vh;
+  top: 0;
+}
+
+.header div {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
 }
 
 .footer {
   background-color: #F7F6F3;
   color: #2A2B2A; 
   text-align: center;
-  padding-bottom: 2vh;
   position: relative;
   bottom: 0;
-  margin-top: 1em;
   width: 100vw;
+  height: 20%;
+  min-height: fit-content;
 }
 
 .footer-content {
@@ -78,42 +191,60 @@
 
 h1 {
   text-align: left;
-  padding-left: 5vw;
+  padding: 1vh 1vw;
   font-family: Georgia, serif;  
-  font-size: 3vh;
+  font-size: xx-large;
   color: #2A2B2A;
   font-weight: 500;
-}
-#info-box {
-  width: 30vw;
-  height: 52vh;
-  background: #FFFFFF;
-  color: #2A2B2A;
-  position: absolute;
-  top: 18vh;
-  left: 0;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-  z-index: 1000;
-  padding: 2%;
-  overflow-y: auto;
-  margin-left: 1vw;
+  text-wrap: nowrap;
 }
 
-.map-buttons {
-  margin-top: 10px;
+#sliderWrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Map and info styles */
+
+#info-box {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  transition: width 0.5s ease, opacity 0.5s ease;
+  opacity: 1;
+}
+
+#info-box.hidden {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: none;
 }
 
 #map {
   border: 2px solid;
   border-color: #2A2B2A;
-  margin-right: '5%';
+  flex: 1;
+  transition: flex 1s ease;
+  overflow: hidden;
+  position: relative;
 }
 
+#mapContainer {
+  display: flex;
+  flex: 1;
+  min-height: 100%;
+  min-width: 100%;
+  flex-direction: row-reverse;
+  transition: all 1s ease;
+}
+
+/* Slider Styles */
 #slider {
   width: 80vw;
-  margin-left: 10vw;
-  margin-right: 1vw;
-  margin-bottom: 1vh;
+  margin: 1vh 1vw;
   -webkit-appearance: none;
   appearance: none;
   background: transparent;

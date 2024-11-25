@@ -13,7 +13,7 @@ import './App.css'
  */
 const App = () => {
   const [year, setYear] = useState(2024)
-  const [heatmap, setHeatmap] = useState(false)
+  const [heatmap, setHeatmap] = useState(true) // True = GG debt, False = CG debt
 
   return (
     <div className='app'>

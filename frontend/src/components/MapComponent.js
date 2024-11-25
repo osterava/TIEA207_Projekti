@@ -13,8 +13,6 @@ import { getGGDebtData } from '../services/publicDebtService.js'
 
 /**
  * Debugattavaa / TODO:
- * vuoden vaihtaminen päivittää kartan, mutta ei päivitä maan tietoja
- * vuoden vaihtaminen esim. 2019 -> 2011, ohjelma jää vuodelle 2015
  * -> ei renderöi VIIMEISINTÄ vuotta, vaan jonkin vuoden, jonka aloitti renderöimään aiemmin
  * | Täytyy selvittää syy, miksi vuoden päivittyminen sekoittaa layerit (useEffect kesken?)
  * Maan nopea valitseminen edellisen valinnan jälkeen sekoittaa maiden tiedot
@@ -26,39 +24,41 @@ import { getGGDebtData } from '../services/publicDebtService.js'
 /**
  * GeoJson initial layer generation
  */
-var defaultGeoJsonLayer = null
-var heatmapGeoJsonLayer = null
+var cgDebtHeatmapLayer = null
+var ggDebtHeatmapLayer = null
 
 /**
  * Apply heatmap style based on the country's debt.
  * @param {*} feature GeoJSON feature representing a country.
  * @param {number} year The selected year to display debt data.
  */
-const applyHeatmapStyle = (feature, year) => {
+const applyHeatmapStyle = (feature, year, isGGDebt) => {
   let fillColor = 'black'
 
-  if (feature && feature.properties && feature.properties.debt && feature.properties.debt[year] !== undefined) {
-    const debt = feature.properties.debt[year]
-
-    if (debt > 100) {
-      fillColor = '#ff0d0d'
-    } else if (debt > 85) {
-      fillColor = '#ff4e11'
-    } else if (debt > 70) {
-      fillColor = '#ff8e15'
-    } else if (debt > 55) {
-      fillColor = '#fab733'
-    } else if (debt > 40) {
-      fillColor = '#acb334'
-    } else if (debt > 25) {
-      fillColor = '#69b34c'
-    } else if (debt > 10) {
-      fillColor = '#3baf4a'
-    } else if (debt > 0) {
-      fillColor = 'green'
-    } else {
-      fillColor = 'black'
-    }
+  let debt = 0
+  if (isGGDebt && feature && feature.properties && feature.properties.debtGG && feature.properties.debtGG[year] !== undefined) {
+    debt = feature.properties.debtGG[year]
+  } else if (!isGGDebt && feature && feature.properties && feature.properties.debtCG && feature.properties.debtCG[year] !== undefined) {
+    debt = feature.properties.debtCG[year]
+  }
+  if (debt > 100) {
+    fillColor = '#ff0d0d'
+  } else if (debt > 85) {
+    fillColor = '#ff4e11'
+  } else if (debt > 70) {
+    fillColor = '#ff8e15'
+  } else if (debt > 55) {
+    fillColor = '#fab733'
+  } else if (debt > 40) {
+    fillColor = '#acb334'
+  } else if (debt > 25) {
+    fillColor = '#69b34c'
+  } else if (debt > 10) {
+    fillColor = '#3baf4a'
+  } else if (debt > 0) {
+    fillColor = 'green'
+  } else {
+    fillColor = 'black'
   }
 
   return {
@@ -74,25 +74,16 @@ const applyHeatmapStyle = (feature, year) => {
  * Highlight function to style the selected country
  * @param {*} e
  */
-function highlightFeature(e) {
+function highlightFeatureHeatmap(e) {
   var layer = e.target
 
   layer.setStyle({
     weight: 5,
-    // fillcolor: 'red'
-    fillColor: '#BF4342',
-    fillOpacity: 1,
+    fillColor: '#fff',
+    fillOpacity: 0.3,
   })
 
   layer.bringToFront()
-}
-
-/**
- * Reset highlight style
- * @param {*} e
- */
-function resetHighlight(e) {
-  defaultGeoJsonLayer.resetStyle(e.target)
 }
 
 /**
@@ -108,23 +99,35 @@ function resetHighlight(e) {
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, publicDebtData, ggDebtData, mapRef) {
-  if (!publicDebtData || !feature || !feature.properties || !ggDebtData) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData) {
+  if (!debtData || !feature || !feature.properties ) {
     console.error('Missing debt data or feature properties')
     return
   }
 
-  var debt = publicDebtData[feature.properties.gu_a3]
-  for (var year in ggDebtData[feature.properties.gu_a3]) {
-    if (debt[year] === undefined) {
-      debt[year] = ggDebtData[feature.properties.gu_a3][year]
+  var debt = debtData[feature.properties.gu_a3]
+  if (ggDebtData) {
+    for (var year in ggDebtData[feature.properties.gu_a3]) {
+      if (debt[year] === undefined) {
+        debt[year] = ggDebtData[feature.properties.gu_a3][year]
+      }
     }
   }
-  if (debt) {
-    feature.properties.debt = debt
+
+  if (ggDebtData) {
+    if (debt) {
+      feature.properties.debtGG = debt
+    } else {
+      // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
+    }
   } else {
-    // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
+    if (debt) {
+      feature.properties.debtCG = debt
+    } else {
+      // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
+    }
   }
+
 
   layer.on({
     click: () => {
@@ -143,63 +146,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
         center = L.latLng(center.lat, center.lng + 50)
         mapRef.current.setView(center, 4)
       }
-    }
-  })
-}
-
-
-/**
- * Assign event handlers to each feature (country) in the map.
- * @param {*} feature GeoJSON feature representing a country.
- * @param {*} layer Leaflet layer for the country.
- * @param {*} setSelectedCountry State updater for selected country.
- * @param {*} setInfoVisible State updater for info box visibility.
- * @param {*} setSelectedCountryCode State updater for selected country code.
- * @param {*} setCountryGBDYear State updater for selected country GDP data.
- * @param {number} year The selected year.
- * @param {*} mapRef Reference to the map object.
- */
-function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, year, mapRef) {
-  const { gu_a3: countryCode, name: countryName } = feature.properties
-
-  layer.on({
-    click: async () => {
-      //resetData()
-      async function setCountryData() {
-        setSelectedCountry(countryName)
-        setSelectedCountryCode(countryCode)
-      }
-      await setCountryData()
-      setInfoVisible(true)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
     },
-    mouseover: highlightFeature,
+    mouseover: highlightFeatureHeatmap,
     mouseout: resetHighlight,
   })
-}
-
-
-
-/**
- * Get style for the GeoJSON layer
- * @returns Style object
- */
-function defaultStyle() {
-  return {
-    //fillcolor: 'grey'
-    fillColor: '#818D92',
-    weight: 2,
-    opacity: 1,
-    // color: white
-    color: '#222222',
-    fillOpacity: 1,
-  }
 }
 
 /**
@@ -270,6 +220,15 @@ const MapComponent = ({ year, heatmap }) => {
   useEffect(() => {
     if (loading) return
 
+    /**
+     * Reset highlight style
+     * @param {*} e
+     */
+    function resetHighlight(e) {
+      if (!heatmap) cgDebtHeatmapLayer.resetStyle(e.target)
+      else ggDebtHeatmapLayer.resetStyle(e.target)
+    }
+
     if (mapRef.current === null) {
       const mapElement = document.getElementById('map')
       const southWest = L.latLng(-89.98155760646617, -200)
@@ -287,26 +246,25 @@ const MapComponent = ({ year, heatmap }) => {
 
         // Add GeoJSON layer with heatmap style
 
-        heatmapGeoJsonLayer = L.geoJson(countries, {
-          style: (feature) => applyHeatmapStyle(feature, year),
+        ggDebtHeatmapLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year, true),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, ggDebtData, mapRef)
+            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, ggDebtData)
         }).addTo(map)
 
         // Add GeoJSON layer with event handling
-        defaultGeoJsonLayer = L.geoJson(countries, {
-          style: defaultStyle,
-          onEachFeature: (feature, layer) =>
-            onEachFeature(feature, layer, setSelectedCountry, setInfoVisible,
-              setSelectedCountryCode, year, mapRef)
+        cgDebtHeatmapLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year, false),
+          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, null)
         }).addTo(map)
       }
     }
 
     if (heatmap) {
-      heatmapGeoJsonLayer.bringToFront()
+      ggDebtHeatmapLayer.bringToFront()
     } else {
-      defaultGeoJsonLayer.bringToFront()
+      cgDebtHeatmapLayer.bringToFront()
     }
 
     return () => {
@@ -317,20 +275,10 @@ const MapComponent = ({ year, heatmap }) => {
     }
   }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData])
 
-  const resetMapView = () => {
-    if (mapRef.current) {
-      const southWest = L.latLng(-65.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds([southWest, northEast])
-      mapRef.current.fitBounds(bounds)
-    }
-  }
-
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
-    resetMapView()
   }
 
   if (loading) {
@@ -341,31 +289,21 @@ const MapComponent = ({ year, heatmap }) => {
    * Bugia: harmaita kohtia jää karttaan infoboxin sulkemisen jälkeen, saattaa olla vain livetestatessa css muuttaessa
    */
   return (
-    <div style={{ display: 'flex', width: '100%' }}>
-      <div
-        id="map"
-        style={{
-          height: '60vh',
-          width: infoVisible ? '60%' : '100%',
-          marginLeft: infoVisible ? '36%' : '5%',
-          marginRight: infoVisible ? '5%' : '5%',
-          transition: 'width 0.3s ease, margin-left 0.3s ease, margin-right 0.3s ease',
-        }}
-      ></div>
+    <div id='mapContainer'>
+      <div id="map"></div>
 
-      {infoVisible && (
-        <InfoBox
-          selectedCountry={selectedCountry}
-          populationData={populationData[selectedCountryCode] !== undefined ? populationData[selectedCountryCode][year] : null}
-          selectedCountryGBDYear={gdpData[selectedCountryCode] !== undefined ? gdpData[selectedCountryCode][year] : null}
-          selectedCountryCode={selectedCountryCode}
-          cgDebt={centralGovernmentDebtData[selectedCountryCode] !== undefined ? centralGovernmentDebtData[selectedCountryCode][year] : null}
-          publicDebt={publicDebtData}
-          centralGovDebt={centralGovernmentDebtData}
-          closeInfoBox={closeInfoBox}
-          year={year}
-        />
-      )}
+      <InfoBox
+        selectedCountry={selectedCountry}
+        populationData={populationData[selectedCountryCode] !== undefined ? populationData[selectedCountryCode][year] : null}
+        selectedCountryGBDYear={gdpData[selectedCountryCode] !== undefined ? gdpData[selectedCountryCode][year] : null}
+        selectedCountryCode={selectedCountryCode}
+        cgDebt={centralGovernmentDebtData[selectedCountryCode] !== undefined ? centralGovernmentDebtData[selectedCountryCode][year] : null}
+        publicDebt={publicDebtData}
+        centralGovDebt={centralGovernmentDebtData}
+        closeInfoBox={closeInfoBox}
+        year={year}
+        infoVisible={infoVisible}
+      />
 
       {/*mapData && <p>{mapData.message}</p>*/}
     </div>
