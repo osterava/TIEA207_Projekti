@@ -19,10 +19,10 @@ const Header = ({ year, setYear, heatmap, setHeatmap }) => {
   }
 
   return (
-    <header className='header' style={{ position: 'relative' }}>
+    <header className='header'>
       <div>
         <h1>DebtMap - View Annual Debt Statistics</h1>
-        <button onClick={onHeatmapToggle} style={{ margin: '10px', padding: '10px' }}>{heatmap ? 'Show CENTRAL government debt' : 'Show GENERAL government debt'}</button>
+        <button onClick={onHeatmapToggle}>{heatmap ? 'Show CENTRAL government debt' : 'Show GENERAL government debt'}</button>
       </div>
       <Slider
         year={year}

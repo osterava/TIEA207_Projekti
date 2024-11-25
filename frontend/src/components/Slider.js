@@ -17,10 +17,19 @@ const Slider = ({ year, setYear }) => {
   const min = 1990
   const max = 2025
 
+  const incrementYear = () => {
+    if (year < max) setYear(year + 1)
+  }
+
+  const decrementYear = () => {
+    if (year > min) setYear(year - 1)
+  }
+
+
   return (
     <div id="sliderWrapper">
       <span>Current: {year}</span>
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      <div>
         <span>{min}</span>
         <input
           id="slider"
@@ -31,7 +40,9 @@ const Slider = ({ year, setYear }) => {
           value={year}
           onChange={handleChange}
         />
-        <span>{max}</span>
+        <span style={{ margin: '0 1vw 0 0' }}>{max}</span>
+        <button onClick={incrementYear}>+</button>
+        <button onClick={decrementYear}>-</button>
       </div>
     </div>
   )

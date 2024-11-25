@@ -238,7 +238,7 @@ const MapComponent = ({ year, heatmap }) => {
       if (mapElement) {
         const map = L.map(mapElement).setView([30, 5], 2)
 
-        // Jostain syystä hajoittaa koodin: 'el is not defined' tms.
+        // Jostain syystä hajoittaa koodin: 'el is undefined'
         //map.setMinZoom(3)
         //map.setMaxZoom(7)
 

@@ -2,6 +2,7 @@
 @media (orientation: portrait) {
   #mapContainer {
     flex-direction: column-reverse !important;
+    height: 80vh !important;
   }
 
   #info-box {
@@ -29,8 +30,7 @@
   }
 
   .header {
-    max-height: 16vh !important;
-    min-height: 16vh !important;
+    height: 12vh !important;
   }
 
   .footer {
@@ -120,12 +120,21 @@ body, html {
   background-color: #F7F6F3;
   text-align: center;
   top: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .header div {
   display: flex !important;
   flex-direction: row !important;
   justify-content: space-between !important;
+}
+
+header > div > button {
+  width: fit-content;
+  height: fit-content;
+  margin: 1vh 1vw;
+  padding: 1vh 1vw;
 }
 
 .footer {
@@ -197,6 +206,7 @@ h1 {
   color: #2A2B2A;
   font-weight: 500;
   text-wrap: nowrap;
+  margin: 0;
 }
 
 #sliderWrapper {
@@ -214,6 +224,7 @@ h1 {
   width: 30%;
   transition: width 0.5s ease, opacity 0.5s ease;
   opacity: 1;
+  padding: 1vh 1vw;
 }
 
 #info-box.hidden {
@@ -227,18 +238,18 @@ h1 {
   border: 2px solid;
   border-color: #2A2B2A;
   flex: 1;
-  transition: flex 1s ease;
+  transition: flex 0.5s ease;
   overflow: hidden;
   position: relative;
+  padding: 1vh 1vw;
 }
 
 #mapContainer {
   display: flex;
-  flex: 1;
-  min-height: 100%;
+  height: 70vh;
   min-width: 100%;
   flex-direction: row-reverse;
-  transition: all 1s ease;
+  transition: all 0.5s ease;
 }
 
 /* Slider Styles */
@@ -250,6 +261,13 @@ h1 {
   background: transparent;
   cursor: pointer;
 }
+
+#sliderWrapper button {
+  padding: 0 1vw;
+  margin: 0 0 1vh 0;
+}
+
+
 
 input[type="range"]::-webkit-slider-runnable-track {
   background: #053a5f;
