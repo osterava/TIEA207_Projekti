@@ -138,6 +138,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
     return
   }
 
+  if (feature.properties.name) {
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'left' })
+  }
+
   const debt = publicDebtData[feature.properties.gu_a3]
   if (debt) {
     feature.properties.debt = debt
@@ -155,13 +159,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
     }
   })
 }
@@ -181,6 +178,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, year, mapRef) {
   const { gu_a3: countryCode, name: countryName } = feature.properties
 
+  if (countryName) {
+    layer.bindTooltip(countryName, { permanent: false, direction: 'right' })
+  }
+
   layer.on({
     click: async () => {
       async function setCountryData() {
@@ -189,13 +190,6 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSe
       }
       await setCountryData()
       setInfoVisible(true)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
     },
     mouseover: highlightFeature,
     mouseout: resetHighlight,
@@ -288,9 +282,6 @@ const MapComponent = ({ year, heatmap }) => {
 
     if (mapRef.current === null) {
       const mapElement = document.getElementById('map')
-      const southWest = L.latLng(-89.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds(southWest, northEast)
 
       if (mapElement) {
         const map = L.map(mapElement).setView([30, 5], 2)
@@ -331,25 +322,12 @@ const MapComponent = ({ year, heatmap }) => {
   }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
   /**
-   * Resets the map view to show all countries.
-   */
-  const resetMapView = () => {
-    if (mapRef.current) {
-      const southWest = L.latLng(-65.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds([southWest, northEast])
-      mapRef.current.fitBounds(bounds)
-    }
-  }
-
-  /**
    * Closes the info box and resets related state.
    */
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
-    resetMapView()
   }
 
   if (loading) {
