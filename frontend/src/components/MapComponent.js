@@ -73,6 +73,23 @@ const applyHeatmapStyle = (feature, year) => {
 }
 
 /**
+ * Get color codes depending on the d value
+ * @param {*} d
+ * @returns color code as string
+ */
+function getColor(d) {
+  return d > 100 ? '#ff0d0d' :
+    d > 85  ? '#ff4e11' :
+      d > 70  ? '#ff8e15' :
+        d > 55  ? '#fab733' :
+          d > 40   ? '#acb334' :
+            d > 25   ? '#69b34c' :
+              d > 10   ? '#3baf4a' :
+                d > 0    ? 'green':
+                  'black'
+}
+
+/**
  * Highlight function to style the selected country
  * @param {*} e
  */
@@ -309,6 +326,7 @@ const MapComponent = ({ year, heatmap }) => {
         const southWest = L.latLng(-89.98155760646617, -200)
         const northEast = L.latLng(89.99346179538875, 200)
         const bounds = L.latLngBounds(southWest, northEast)
+        const legend = L.control({ position: 'bottomright' })
 
         if (mapElement) {
           const map = L.map(mapElement).setView([30, 5], 2)
@@ -320,6 +338,21 @@ const MapComponent = ({ year, heatmap }) => {
           map.setMaxZoom(7)
 
           mapRef.current = map
+
+          // Create and add legend to the map using leaflet's DomUtil
+          legend.onAdd = () => {
+            let div = L.DomUtil.create('div', 'info legend'),
+              grades = [0, 10, 25, 40, 55, 70, 85, 100]
+            div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data'
+            // Get colors for the intervals
+            for (let i = 0; i < grades.length; i++) {
+              div.innerHTML +=
+              '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+              grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
+            }
+            return div
+          }
+          legend.addTo(map)
 
           // Add GeoJSON layer with heatmap style
           // TODO: Selvitä miksi heatmap ei toimi
