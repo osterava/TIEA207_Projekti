@@ -9,7 +9,6 @@ import React, { useEffect, useRef, useState } from 'react'
 */
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import * as turf from '@turf/turf'
 
 /**
  * JSON file containing geographical data for countries.
