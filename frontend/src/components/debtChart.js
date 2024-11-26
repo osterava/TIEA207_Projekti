@@ -82,8 +82,7 @@ const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
   }
 
   return (
-    <div>
-      <h3>{countryCode} General Government Gross Debt vs Total Debt</h3>
+    <div id="debtChart">
       <Line data={chartData} options={options} />
     </div>
   )

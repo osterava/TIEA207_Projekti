@@ -140,12 +140,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
+      highlightFeatureHeatmap({ target: layer })
     },
     mouseover: highlightFeatureHeatmap,
     mouseout: resetHighlight,
@@ -282,7 +277,7 @@ const MapComponent = ({ year, heatmap }) => {
   }
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div style={{ justifyContent: 'center', display: 'flex', margin: '3vh' }}><strong>Loading map...</strong></div>
   }
 
   /**

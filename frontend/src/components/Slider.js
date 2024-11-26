@@ -28,7 +28,6 @@ const Slider = ({ year, setYear }) => {
 
   return (
     <div id="sliderWrapper">
-      <span>Current: {year}</span>
       <div>
         <span>{min}</span>
         <input
@@ -41,8 +40,9 @@ const Slider = ({ year, setYear }) => {
           onChange={handleChange}
         />
         <span style={{ margin: '0 1vw 0 0' }}>{max}</span>
-        <button onClick={incrementYear}>+</button>
         <button onClick={decrementYear}>-</button>
+        <span style={{ margin: '0 1vw' }}>{year}</span>
+        <button onClick={incrementYear}>+</button>
       </div>
     </div>
   )
