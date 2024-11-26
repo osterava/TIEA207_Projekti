@@ -1,25 +1,13 @@
-/**
- * React and hooks import for managing component state and lifecycle.
- */
-
 import React, { useEffect, useRef, useState } from 'react'
-
-/**
- * Leaflet library for interactive maps and required CSS for styling.
-*/
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import mapService from '../services/mapService.js'
-import populationService from '../services/popService.js'
-import gdpService from '../services/gdpService.js'
 import countries from '../data/countries.json'
-
-/**
- * Custom InfoBox component to display detailed information about selected countries.
- */
-
 import InfoBox from './infoBox.js'
-import { getData } from '../services/debtService.js'
+import { getData as getPublicDebtData } from '../services/publicDebtService.js'
+import { getData as getGDPData } from '../services/gdpService.js'
+import { getData as getPopulationData } from '../services/popService.js'
+import { getData as getCGDebtData } from '../services/cgDebtService.js'
+import { getMapData } from '../services/mapService.js'
 import { debounce } from 'lodash'
 
 
@@ -126,7 +114,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
     return
   }
 
-  const debt = debtData[feature.properties.gu_a3]
+  const debt = publicDebtData[feature.properties.gu_a3]
   if (debt) {
     feature.properties.debt = debt
   } else {
@@ -146,13 +134,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       if (mapRef.current && feature.geometry) {
         const bounds = L.geoJSON(feature.geometry).getBounds()
-        mapRef.current.fitBounds(bounds, {
-          padding: [5, 5],
-        })
+        let center = bounds.getCenter()
+        center = L.latLng(center.lat, center.lng + 50)
+        mapRef.current.setView(center, 4)
       }
-
-      // Use the common fetch function
-      fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
     }
   })
 }
@@ -172,37 +157,26 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, year, mapRef) {
   const { gu_a3: countryCode, name: countryName } = feature.properties
 
-  if (countryName) {
-    layer.bindTooltip(countryName, { permanent: false, direction: 'auto', className: 'labelstyle', sticky: true })
-  }
-
   layer.on({
-    click: () => {
-      resetData()
-      setSelectedCountry(feature.properties)
+    click: async () => {
+      //resetData()
+      async function setCountryData() {
+        setSelectedCountry(countryName)
+        setSelectedCountryCode(countryCode)
+      }
+      await setCountryData()
       setInfoVisible(true)
-      setSelectedCountryCode(countryCode)
 
       if (mapRef.current && feature.geometry) {
         const bounds = L.geoJSON(feature.geometry).getBounds()
-        mapRef.current.fitBounds(bounds, {
-          padding: [5, 5],
-        })
+        let center = bounds.getCenter()
+        center = L.latLng(center.lat, center.lng + 50)
+        mapRef.current.setView(center, 4)
       }
-
-      // Use the common fetch function
-      fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
     },
     mouseover: highlightFeature,
     mouseout: resetHighlight,
   })
-
-  function resetData() {
-    setSelectedCountry(null)
-    setPopulationData(null)
-    setSelectedCountryCode(null)
-    setCountryGBDYear(null)
-  }
 }
 
 
@@ -223,14 +197,9 @@ function defaultStyle() {
   }
 }
 
-/* ------------------------------------------------------------------------------------------------------------------------------------------ */
-
 /**
- * React component for the map.
- * Manages the visualization of countries, data fetching, and user interaction.
- * @param {Object} props - Component properties.
- * @param {number} props.year - The selected year for data visualization.
- * @param {boolean} props.heatmap - Flag to toggle heatmap visualization.
+ * Main component for displaying the map and managing country data.
+ * @param {year,heatmap} props The props passed to the component.
  */
 const MapComponent = ({ year, heatmap }) => {
   const [publicDebtData, setPublicDebtData] = useState(null)
@@ -245,14 +214,39 @@ const MapComponent = ({ year, heatmap }) => {
 
   const mapRef = useRef(null)
 
-  // TODO: debtDatan mukaisesti populointi ja gdp datan haku ja asettaminen
+  // TODO: debtDatan mukaisesti gdp datan haku ja asettaminen
   useEffect(() => {
     if (!loading) return
     const fetchData = async () => {
       try {
-        const result = await getData()
-        var data = result.values.GGXWDG_NGDP
-        setDebtData(data)
+        // Getting public debt data
+        const pdData = await getPublicDebtData()
+        var data = pdData.values.GGXWDG_NGDP
+        setPublicDebtData(data)
+        console.log('Debt data:', data)
+
+        // Getting population data
+        const popData = await getPopulationData()
+        data = popData.values.LP
+        setPopulationData(data)
+        console.log('Population data:', data)
+
+        // Getting GDP data
+        const gdp_Data = await getGDPData()
+        data = gdp_Data.values.NGDPD
+        setGDPData(data)
+        console.log('GDP data:', data)
+
+        // Getting central government debt data
+        const cgDebtData = await getCGDebtData()
+        data = cgDebtData.values.CG_DEBT_GDP
+        setCentralGovernmentDebtData(data)
+        console.log('Central government debt data:', data)
+
+        const rawMapData = await getMapData()
+        //setMapData(rawMapData)
+        console.log('Map data:', rawMapData)
+
         setLoading(false)
       } catch (err) {
         console.error(err)
@@ -266,11 +260,11 @@ const MapComponent = ({ year, heatmap }) => {
   useEffect(() => {
     if (loading) return
 
-      if (mapRef.current === null) {
-        const mapElement = document.getElementById('map')
-        const southWest = L.latLng(-89.98155760646617, -200)
-        const northEast = L.latLng(89.99346179538875, 200)
-        const bounds = L.latLngBounds(southWest, northEast)
+    if (mapRef.current === null) {
+      const mapElement = document.getElementById('map')
+      const southWest = L.latLng(-89.98155760646617, -200)
+      const northEast = L.latLng(89.99346179538875, 200)
+      const bounds = L.latLngBounds(southWest, northEast)
 
       if (mapElement) {
         const map = L.map(mapElement).setView([30, 5], 2)
@@ -281,24 +275,21 @@ const MapComponent = ({ year, heatmap }) => {
 
         mapRef.current = map
 
-          // Add GeoJSON layer with heatmap style
-          // TODO: Selvitä miksi heatmap ei toimi
-          heatmapGeoJsonLayer = L.geoJson(countries, {
-            style: (feature) => applyHeatmapStyle(feature, year),
-            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
-              setSelectedCountryCode,setCountryGBDYear, debtData, year, mapRef)
-          }).addTo(map)
+        // Add GeoJSON layer with heatmap style
+        // TODO: Selvitä miksi heatmap ei toimi
+        heatmapGeoJsonLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year),
+          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+            setSelectedCountryCode, publicDebtData, year, mapRef)
+        }).addTo(map)
 
-          // Add GeoJSON layer with event handling
-          defaultGeoJsonLayer = L.geoJson(countries, {
-            style: defaultStyle,
-            onEachFeature: (feature, layer) =>
-              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
-                setSelectedCountryCode,setCountryGBDYear, year, mapRef)
-          }).addTo(map)
-        }
-
-        debounceHeatmap()
+        // Add GeoJSON layer with event handling
+        defaultGeoJsonLayer = L.geoJson(countries, {
+          style: defaultStyle,
+          onEachFeature: (feature, layer) =>
+            onEachFeature(feature, layer, setSelectedCountry, setInfoVisible,
+              setSelectedCountryCode, year, mapRef)
+        }).addTo(map)
       }
     }
 
@@ -314,12 +305,11 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-
-  }, [loading,debtData, year, heatmap])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
   const resetMapView = () => {
     if (mapRef.current) {
-      const southWest = L.latLng(-89.98155760646617, -200)
+      const southWest = L.latLng(-65.98155760646617, -200)
       const northEast = L.latLng(89.99346179538875, 200)
       const bounds = L.latLngBounds([southWest, northEast])
       mapRef.current.fitBounds(bounds)
@@ -330,7 +320,6 @@ const MapComponent = ({ year, heatmap }) => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
-    setCountryGBDYear(null)
     resetMapView()
   }
 
@@ -368,7 +357,7 @@ const MapComponent = ({ year, heatmap }) => {
         />
       )}
 
-      {mapData && <p>{mapData.message}</p>}
+      {/*mapData && <p>{mapData.message}</p>*/}
     </div>
   )
 }
