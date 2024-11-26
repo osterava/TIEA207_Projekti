@@ -13,6 +13,15 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
+/**
+ * DebtChart Component
+ * Renders a line chart comparing General Government Gross Debt and Total Debt for a specific country.
+ * @param {Object} props - Component properties
+ * @param {string} props.countryCode - Country code to filter data
+ * @param {Object} props.centralGovDebt - Data for total debt by year
+ * @param {Object} props.publicDebt - Data for public debt by year
+ * @returns {JSX.Element} - A React component rendering the debt chart or an appropriate message if data is unavailable.
+ */
 const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
 
   const totalDebtData = centralGovDebt[countryCode]

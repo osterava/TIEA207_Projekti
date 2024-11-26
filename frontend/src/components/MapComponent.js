@@ -1,15 +1,39 @@
+/**
+ * React and hooks import for managing component state and lifecycle.
+ */
+
 import React, { useEffect, useRef, useState } from 'react'
+
+/**
+ * Leaflet library for interactive maps and required CSS for styling.
+*/
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+
+/**
+ * JSON file containing geographical data for countries.
+ */
 import countries from '../data/countries.json'
+
+/**
+ * Custom InfoBox component to display detailed information about selected countries.
+ */
+
 import InfoBox from './infoBox.js'
+
+/**
+ * Services to fetch data:
+ * - Public debt data
+ * - GDP data
+ * - Population data
+ * - Central government debt data
+ * - GeoJSON map data
+ */
 import { getData as getPublicDebtData } from '../services/publicDebtService.js'
 import { getData as getGDPData } from '../services/gdpService.js'
 import { getData as getPopulationData } from '../services/popService.js'
 import { getData as getCGDebtData } from '../services/cgDebtService.js'
 import { getMapData } from '../services/mapService.js'
-import { debounce } from 'lodash'
-
 
 /**
  * Debugattavaa / TODO:
@@ -114,6 +138,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
     return
   }
 
+  if (feature.properties.name) {
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'auto', className:'labelstyle', sticky: true  })
+  }
+
   const debt = publicDebtData[feature.properties.gu_a3]
   if (debt) {
     feature.properties.debt = debt
@@ -131,13 +159,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
     }
   })
 }
@@ -157,29 +178,23 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, year, mapRef) {
   const { gu_a3: countryCode, name: countryName } = feature.properties
 
+  if (countryName) {
+    layer.bindTooltip(countryName, { permanent: false, direction: 'auto', className: 'labelstyle', sticky: true })
+  }
+
   layer.on({
     click: async () => {
-      //resetData()
       async function setCountryData() {
         setSelectedCountry(countryName)
         setSelectedCountryCode(countryCode)
       }
       await setCountryData()
       setInfoVisible(true)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
     },
     mouseover: highlightFeature,
     mouseout: resetHighlight,
   })
 }
-
-
 
 /**
  * Get style for the GeoJSON layer
@@ -197,9 +212,14 @@ function defaultStyle() {
   }
 }
 
+/* ------------------------------------------------------------------------------------------------------------------------------------------ */
+
 /**
- * Main component for displaying the map and managing country data.
- * @param {year,heatmap} props The props passed to the component.
+ * React component for the map.
+ * Manages the visualization of countries, data fetching, and user interaction.
+ * @param {Object} props - Component properties.
+ * @param {number} props.year - The selected year for data visualization.
+ * @param {boolean} props.heatmap - Flag to toggle heatmap visualization.
  */
 const MapComponent = ({ year, heatmap }) => {
   const [publicDebtData, setPublicDebtData] = useState(null)
@@ -214,30 +234,28 @@ const MapComponent = ({ year, heatmap }) => {
 
   const mapRef = useRef(null)
 
-  // TODO: debtDatan mukaisesti gdp datan haku ja asettaminen
+  /**
+   * Fetch all data that is needed to run the application
+   */
   useEffect(() => {
     if (!loading) return
     const fetchData = async () => {
       try {
-        // Getting public debt data
         const pdData = await getPublicDebtData()
         var data = pdData.values.GGXWDG_NGDP
         setPublicDebtData(data)
         console.log('Debt data:', data)
 
-        // Getting population data
         const popData = await getPopulationData()
         data = popData.values.LP
         setPopulationData(data)
         console.log('Population data:', data)
 
-        // Getting GDP data
         const gdp_Data = await getGDPData()
         data = gdp_Data.values.NGDPD
         setGDPData(data)
         console.log('GDP data:', data)
 
-        // Getting central government debt data
         const cgDebtData = await getCGDebtData()
         data = cgDebtData.values.CG_DEBT_GDP
         setCentralGovernmentDebtData(data)
@@ -262,9 +280,6 @@ const MapComponent = ({ year, heatmap }) => {
 
     if (mapRef.current === null) {
       const mapElement = document.getElementById('map')
-      const southWest = L.latLng(-89.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds(southWest, northEast)
 
       if (mapElement) {
         const map = L.map(mapElement).setView([30, 5], 2)
@@ -275,15 +290,13 @@ const MapComponent = ({ year, heatmap }) => {
 
         mapRef.current = map
 
-        // Add GeoJSON layer with heatmap style
-        // TODO: Selvitä miksi heatmap ei toimi
         heatmapGeoJsonLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year),
-          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, year, mapRef)
+          onEachFeature: (feature, layer) =>
+            heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+              setSelectedCountryCode, publicDebtData, year, mapRef)
         }).addTo(map)
 
-        // Add GeoJSON layer with event handling
         defaultGeoJsonLayer = L.geoJson(countries, {
           style: defaultStyle,
           onEachFeature: (feature, layer) =>
@@ -307,20 +320,13 @@ const MapComponent = ({ year, heatmap }) => {
     }
   }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
-  const resetMapView = () => {
-    if (mapRef.current) {
-      const southWest = L.latLng(-65.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds([southWest, northEast])
-      mapRef.current.fitBounds(bounds)
-    }
-  }
-
+  /**
+   * Closes the info box and resets related state.
+   */
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
-    resetMapView()
   }
 
   if (loading) {
@@ -356,8 +362,6 @@ const MapComponent = ({ year, heatmap }) => {
           year={year}
         />
       )}
-
-      {/*mapData && <p>{mapData.message}</p>*/}
     </div>
   )
 }
