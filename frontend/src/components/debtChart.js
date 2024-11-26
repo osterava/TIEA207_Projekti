@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Line } from 'react-chartjs-2'
-import { getDebtData } from '../services/debtService.js'
-import { getTotalDebtData } from '../services/totalDebtService.js'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,31 +13,10 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
-const DebtChart = ({ countryCode }) => {
-  const [debtData, setDebtData] = useState({})
-  const [totalDebtData, setTotalDebtData] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!countryCode) return
-      try {
-        setLoading(true)
-        const data = await getDebtData(countryCode)
-        const totalData = await getTotalDebtData(countryCode)
-        setDebtData(data)
-        setTotalDebtData(totalData)
-      } catch (error) {
-        console.error('Error fetching debt data:', error)
-        setError('Failed to load debt data')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [countryCode])
+  const totalDebtData = centralGovDebt[countryCode]
+  const debtData = publicDebt[countryCode]
 
   const labels = debtData && Object.keys(debtData)
 
@@ -93,14 +70,6 @@ const DebtChart = ({ countryCode }) => {
         position: 'top',
       },
     },
-  }
-
-  if (loading) {
-    return <p>Loading data...</p>
-  }
-
-  if (error) {
-    return <p>{error}</p>
   }
 
   if (!debtData || Object.keys(debtData).length === 0) {
