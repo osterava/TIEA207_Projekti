@@ -343,7 +343,7 @@ const MapComponent = ({ year, heatmap }) => {
           legend.onAdd = () => {
             let div = L.DomUtil.create('div', 'info legend'),
               grades = [0, 10, 25, 40, 55, 70, 85, 100]
-            div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data'
+            div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data<br />'
             // Get colors for the intervals
             for (let i = 0; i < grades.length; i++) {
               div.innerHTML +=
