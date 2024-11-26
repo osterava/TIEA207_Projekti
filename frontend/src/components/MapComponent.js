@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react'
 */
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import * as turf from '@turf/turf'
 
 /**
  * JSON file containing geographical data for countries.
@@ -139,7 +140,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
   }
 
   if (feature.properties.name) {
-    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'left' })
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'auto', className:'labelstyle', sticky: true  })
   }
 
   const debt = publicDebtData[feature.properties.gu_a3]
@@ -179,7 +180,7 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSe
   const { gu_a3: countryCode, name: countryName } = feature.properties
 
   if (countryName) {
-    layer.bindTooltip(countryName, { permanent: false, direction: 'right' })
+    layer.bindTooltip(countryName, { permanent: false, direction: 'auto', className: 'labelstyle', sticky: true })
   }
 
   layer.on({
@@ -195,8 +196,6 @@ function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setSe
     mouseout: resetHighlight,
   })
 }
-
-
 
 /**
  * Get style for the GeoJSON layer
@@ -294,8 +293,9 @@ const MapComponent = ({ year, heatmap }) => {
 
         heatmapGeoJsonLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year),
-          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, year, mapRef)
+          onEachFeature: (feature, layer) =>
+            heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+              setSelectedCountryCode, publicDebtData, year, mapRef)
         }).addTo(map)
 
         defaultGeoJsonLayer = L.geoJson(countries, {
