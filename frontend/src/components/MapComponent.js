@@ -282,7 +282,7 @@ const MapComponent = ({ year, heatmap }) => {
       const mapElement = document.getElementById('map')
 
       if (mapElement) {
-        const map = L.map(mapElement).setView([30, 5], 2)
+        const map = L.map(mapElement).setView([40, 5], 3)
 
         // Jostain syystä hajoittaa koodin: 'el is not defined' tms.
         //map.setMinZoom(3)
@@ -337,9 +337,11 @@ const MapComponent = ({ year, heatmap }) => {
    * Bugia: harmaita kohtia jää karttaan infoboxin sulkemisen jälkeen, saattaa olla vain livetestatessa css muuttaessa
    * <div style={{ display: 'flex', width: '100%' }}></div>
    */
+
   return (
     <div className='midwrapper'>
-      <div id='map' style={{ width: infoVisible ? '60vw' : '90vw',
+      <div id='map' style={{
+        width: infoVisible ? '60vw' : '90vw',
         transition: 'width 0.3s ease'
       }}/>
 
