@@ -1,0 +1,49 @@
+input {
+    background-color: white;
+    border-radius: 10px;
+    height: 2.5rem;
+    padding: 0 15px;
+    align-items: center;
+    border: none;
+    box-shadow: 0px 0px 8px;
+    margin-left: 15px;
+    margin-bottom: 2vh;
+}
+
+input:focus {
+    outline: none;
+}
+
+.search_suggestion_line {
+  display: block; /* Tee elementistä samanlainen kuin linkki */
+  background: none; /* Poistaa oletuspainikkeen taustavärin */
+  border: none; /* Poistaa oletuspainikkeen reunukset */
+  text-align: left; /* Varmistaa, että teksti on vasemmassa reunassa */
+  width: 100%; /* Vie koko käytettävissä olevan tilan */
+  padding: 10px; /* Lisää mukavasti tilaa ympärille */
+  cursor: pointer; /* Lisää linkkimäinen kursori */
+  text-decoration: none; /* Poistaa mahdollisen alleviivauksen */
+  color: inherit; /* Käyttää perittyä tekstin väriä */
+}
+
+  .search_suggestion_line:hover {
+    background-color: #bec2c5;
+  }
+
+  .search_result {
+    margin-left: 35px;
+    position: absolute; /* Näytä hakutulokset suhteessa .input-wrapper-komponenttiin */
+    z-index: 1000; /* Hakutulokset näkyvät muiden elementtien päällä */
+    background-color: #fff;
+    max-height: 200px; /* Rajoittaa listan korkeutta */
+    overflow-y: auto; /* Lisää pystysuuntainen vieritys */
+    width: 12%;
+  }
+
+  #clear-icon {
+    position: absolute;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
