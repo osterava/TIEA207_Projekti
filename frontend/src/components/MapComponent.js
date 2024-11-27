@@ -33,7 +33,6 @@ import { getData as getPublicDebtData } from '../services/publicDebtService.js'
 import { getData as getGDPData } from '../services/gdpService.js'
 import { getData as getPopulationData } from '../services/popService.js'
 import { getData as getCGDebtData } from '../services/cgDebtService.js'
-import { getMapData } from '../services/mapService.js'
 import { getGGDebtData } from '../services/publicDebtService.js'
 
 
@@ -186,7 +185,6 @@ const MapComponent = ({ year, heatmap }) => {
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
   const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
-  //const [mapData, setMapData] = useState(null) // Ilmeisesti jsonplaceholderin dataa palvelimen puolella....
   const [infoVisible,   setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
@@ -220,10 +218,6 @@ const MapComponent = ({ year, heatmap }) => {
         data = cgDebtData.values.CG_DEBT_GDP
         setCentralGovernmentDebtData(data)
         console.log('Central government debt data:', data)
-
-        const rawMapData = await getMapData()
-        //setMapData(rawMapData)
-        console.log('Map data:', rawMapData)
 
         const ggDebtData = await getGGDebtData()
         data = ggDebtData.values.GG_DEBT_GDP
@@ -311,7 +305,6 @@ const MapComponent = ({ year, heatmap }) => {
   return (
     <div id='mapContainer'>
       <div id="map"></div>
-
       <InfoBox
         selectedCountry={selectedCountry}
         populationData={populationData[selectedCountryCode] !== undefined ? populationData[selectedCountryCode][year] : null}
@@ -324,8 +317,6 @@ const MapComponent = ({ year, heatmap }) => {
         year={year}
         infoVisible={infoVisible}
       />
-
-      {/*mapData && <p>{mapData.message}</p>*/}
     </div>
   )
 }
