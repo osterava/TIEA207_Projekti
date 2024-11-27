@@ -260,6 +260,9 @@ input:focus {
 .footer {
   display: flex;
   flex-direction: column;
+  gap:0.2em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 }
 
 .names_header {
@@ -270,7 +273,7 @@ input:focus {
 }
 
 .names_header p {
-  font-size: 12px;
+  font-size: 14px;
   color: black;
 }
 
@@ -286,14 +289,15 @@ input:focus {
 }
 
 .tooltip {
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   position: relative;
 }
 
 .tooltip::after {
   content: attr(data-tooltip);
-  width: 200px;
+  width: auto;
+  white-space: nowrap;
   position: absolute;
   bottom: 150%;
   left: 50%;
@@ -302,9 +306,11 @@ input:focus {
   color: #fff;
   border-radius: 4px;
   font-size: 12px;
+  padding: 5px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease-in-out;
+  z-index: 9999; 
 }
 
 .tooltip:hover::after {
