@@ -1,75 +1,271 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  height: 100%;
+  width: 100%;
+  font-family: Arial, sans-serif;
+}
+
 .app {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  height: 100%;
+  width: 100%;
   margin: 0;
-  background-color: #FFFFFF;
-  /*Muistilista: beige */
-  /* #222222 #FFFFFF #7D84B2 #BF4342 #F7934C */
-}
-
-.header {
-  width: 100vw;
+  padding: 0;
   background-color: #F7F6F3;
-  text-align: center;
-  margin-bottom: 2vh;
+  box-sizing: border-box;
 }
 
+/* Header Styling */
+.header {
+  width: 100%;
+  height: 10%; /* Reserve consistent height */
+  background-color: #F7F6F3;
+  display: flex;
+  flex-direction: column; /* Stack title and slider vertically */
+  align-items: center;
+  justify-content: space-evenly;
+  border-bottom: 1px solid #ccc;
+  padding: 1vh 1vw; /* Add padding for spacing */
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for hierarchy */
+  box-sizing: border-box;
+  gap: 0;
+}
+
+.header div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%; /* Full-width layout for title and button */
+}
+
+.header h1 {
+  font-size: 1.5rem; /* Adjustable font size */
+  margin: 0;
+  color: #2A2B2A;
+}
+
+.header button {
+  background-color: #007BFF; /* Primary blue */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.header button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.header button:active {
+  background-color: #004080; /* Even darker blue on active state */
+}
+
+/* Footer */
 .footer {
+  width: 100%;
+  height: 10%; /* Reserve space for the footer */
   background-color: #F7F6F3;
   color: #2A2B2A; 
   text-align: center;
-  padding-bottom: 2vh;
-  position: relative;
-  bottom: 0;
-  margin-top: 1em;
-  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #ccc;
+  box-sizing: border-box;
+  margin: 2px 0 0 0;
 }
 
 .footer-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Stack items vertically */
   align-items: center;
+  font-size: 0.9rem; /* Reduce font size */
+  gap: 0; /* Reduce spacing between elements */
+  margin: 0;
+  padding: 0;
 }
 
 .names_header {
   display: flex;
   flex-direction: row;
-  gap: 5px;
+  gap: 0;
+  font-size: 0.8rem; /* Smaller text for names header */
 }
 
 .licences {
-  width: 40px; 
-  height: 40px; 
+  width: 30px; /* Reduce image size */
+  height: 30px;
 }
 
-.license_tab {
+
+/* Map Component */
+#mapContainer {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: row-reverse;
+  flex: 1; /* Take up the remaining space */
+  margin: 0;
+  padding: 2vh 2vw;
+  background-color: #ddf;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.tooltip {
+#map {
+  flex: 1; /* Automatically expand to available space */
+  width: 100%;
+  height: 100%;
+  border: 2px solid #2A2B2A;
+  margin: 0;
+  padding: 0;
   position: relative;
+  box-sizing: border-box;
+}
+
+/* Info Box */
+#info-box {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  height: 100%; /* Adjust to content height */
+  max-height: 80vh;
+  transition: width 0.5s ease, opacity 0.5s ease;
+  opacity: 1;
+  background-color: #fff; /* Background for clarity */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for visual hierarchy */
+  overflow-y: auto; /* Allow scrolling for long content */
+}
+
+#info-box > div {
+  padding: 1rem;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+#info-box.hidden {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: none;
+}
+
+/* Button Styling */
+#info-box button {
+  background-color: #f44336; /* Red close button */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin: 1vh 1vw;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+#info-box button:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
+
+/* Text Content */
+#info-box h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+#info-box p {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+/* Debt Chart */
+#debtChart {
+  width: 100%;
+  height: 300px; /* Fixed height */
+  max-height: 80vh; /* Constrain height to 80% of the viewport */
+  overflow-y: hidden; /* Prevent content from overflowing vertically */
+  margin: 1vh 1vw;
+  box-sizing: border-box;
+}
+
+#debtChart canvas {
+  width: 100%; /* Ensure the canvas fills the parent's width */
+  height: 100%; /* Make canvas height proportional to the parent */
+  max-height: 100%; /* Prevent canvas from exceeding parent height */
+  box-sizing: border-box; /* Include padding and border in size calculation */
+}
+
+/* Slider Component */
+#sliderWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin: 0 1vw;
+}
+
+#slider {
+  width: 90%; /* Occupy most of the header width */
+  height: 0.5rem;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #ccc;
+  border-radius: 4px;
+  outline: none;
+  margin: 0.5rem 0.5rem;
+}
+
+#slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: #007BFF;
+  border: none;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
   cursor: pointer;
 }
 
+#slider::-moz-range-thumb {
+  background-color: #007BFF;
+  border: none;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+/* Tooltip Styles */
+.tooltip {
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
 .tooltip::after {
-  content: attr(data-tooltip); 
+  content: attr(data-tooltip);
   position: absolute;
   bottom: 150%;
   left: 50%;
   transform: translateX(-50%);
   background-color: #333;
   color: #fff;
-  padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.8em;
-  white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease-in-out;
-  z-index: 10;
 }
 
 .tooltip:hover::after {
@@ -92,56 +288,79 @@
   text-align: center;
 }
 
-h1 {
-  text-align: left;
-  padding-left: 5vw;
-  font-family: Georgia, serif;  
-  font-size: 3vh;
-  color: #2A2B2A;
-  font-weight: 500;
-}
-#info-box {
-  width: 30vw;
-  height: 52vh;
-  background: #FFFFFF;
-  color: #2A2B2A;
-  position: absolute;
-  top: 18vh;
-  left: 0;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-  z-index: 1000;
-  padding: 2%;
-  overflow-y: auto;
-  margin-left: 1vw;
+/* Responsive Design */
+
+/* Portrait Mode */
+@media (orientation: portrait) {
+  #mapContainer {
+    flex-direction: column-reverse;
+    height: calc(100% - 20vh); /* Account for header and footer height */
+  }
+
+  #map {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+  }
+
+  .header, .footer {
+    height: 10vh; /* Standardized height for header and footer */
+  }
+
+  #info-box {
+    width: 100%;
+    height: 50%;
+    padding: 0;
+    margin: 0;
+    transition: height 0.5s ease, opacity 0.5s ease;
+  }
+
+  #info-box.hidden {
+    width: 0;
+    height: 0;
+    padding: 0;
+  }
+
+  .header h1 {
+    font-size: 2rem; /* Slightly smaller font for portrait */
+  }
+
+  #slider {
+    width: 80%; /* Slightly reduced width */
+  }
 }
 
-.map-buttons {
-  margin-top: 10px;
-}
+/* Landscape Mode */
+@media (orientation: landscape) {
+  #mapContainer {
+    flex: 1;
+    height: calc(100% - 20vh); /* Ensure header/footer still apply */
+  }
 
-#map {
-  border: 2px solid;
-  border-color: #2A2B2A;
-  margin-right: '5%';
-}
+  #map {
+    flex: 1;
+    min-height: auto; /* Map height adjusts naturally in landscape */
+    width: auto;
+  }
 
-#slider {
-  width: 80vw;
-  margin-left: 10vw;
-  margin-right: 1vw;
-  margin-bottom: 1vh;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
+  .header, .footer {
+    height: 10vh; /* Standardized height for header and footer */
+  }
 
-input[type="range"]::-webkit-slider-runnable-track {
-  background: #053a5f;
-  height: 0.5rem;
-}
+  #info-box {
+    width: 30%;
+    max-height: 100%;
+  }
 
-input[type="range"]::-moz-range-track {
-  background: #053a5f;
-  height: 0.5rem;
+  .header h1 {
+    font-size: 1.5rem; /* Standard font size */
+  }
+
+  #slider {
+    width: 90%; /* Full slider width for landscape */
+  }
+
+  .footer {
+    justify-self: flex-end;
+  }
 }

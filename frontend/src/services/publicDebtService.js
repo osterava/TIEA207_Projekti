@@ -13,5 +13,10 @@ export const getData = async () => {
   return response.data
 }
 
-const dataService = { getData }
+export const getGGDebtData = async () => {
+  const response = await axios.get('/api/gg_debt')
+  return response.data
+}
+
+const dataService = { getData, getGGDebtData }
 export default dataService
