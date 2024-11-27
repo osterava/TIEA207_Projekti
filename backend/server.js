@@ -1,7 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const mapRoutes = require('./routes/mapRoutes')
 const dataRoute = require('./routes/dataRoutes')
 const popRoute = require('./routes/populationRoute')
 const gdpRoute = require('./routes/gdpRoute')
@@ -32,7 +31,6 @@ app.use(cors())
 app.use(express.static('build'))
 
 // Define API routes for different resources
-app.use('/api/maps', mapRoutes)
 app.use('/api/debt', dataRoute)
 app.use('/api/total_debt', totalDebtRoute)
 app.use('/api/population', popRoute)
