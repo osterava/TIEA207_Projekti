@@ -37,14 +37,14 @@ const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
     labels: labels,
     datasets: [
       {
-        label: 'General Government Gross Debt (% per GDP)',
+        label: 'General Government Debt (% of GDP)',
         data: debtData && Object.values(debtData),
         fill: false,
         borderColor: 'rgba(75, 192, 192, 1)',
         tension: 0.1,
       },
       {
-        label: 'Total Debt (% per GDP)',
+        label: 'Central Government Debt (% of GDP)',
         data: filteredTotalDebtData,
         fill: false,
         borderColor: 'rgba(255, 99, 132, 1)',

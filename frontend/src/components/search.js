@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
 import InfoBox from './infoBox'
-import './search.css'
 import countriesData from '../data/countries.json'
 import populationService from '../services/popService.js'
 import gdpService from '../services/gdpService.js'
 
-const Search = ({ year }) => {
+const Search = ({ year, onMouseEnter, onMouseLeave }) => {
   const [search, setSearch] = useState('')
   const [searchData, setSearchData] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -84,38 +83,40 @@ const Search = ({ year }) => {
   }, [search])
 
   return (
-    <div className="input-wrapper" ref={searchRef}>
-      <FaSearch id="search-icon" />
-      <input
-        placeholder="Type to search..."
-        onChange={handleChange}
-        value={search}
-        onFocus={() => setShowSuggestions(true)}
-      />
-      {search && <FaTimes id="clear-icon" onClick={handleClear} />}
-      {showSuggestions && searchData.length > 0 && (
-        <div className="search_result">
-          {searchData.map((country, index) => (
-            <button
-              key={index}
-              className="search_suggestion_line"
-              onClick={() => handleSuggestionClick(country)}
-            >
-              {country.properties.name}
-            </button>
-          ))}
-        </div>
-      )}
-      {selectedCountry && (
-        <InfoBox
-          selectedCountry={selectedCountry}
-          populationData={populationData}
-          selectedCountryGBDYear={gdpData}
-          selectedCountryCode={selectedCountry.gu_a3}
-          closeInfoBox={closeInfoBox}
-          year={year}
+    <div className="search" ref={searchRef} onMouseEnter={onMouseEnter}  onMouseLeave={onMouseLeave}>
+      <div className='searchWrapper'>
+        <FaSearch id="search-icon" />
+        <input
+          placeholder="Type to search..."
+          onChange={handleChange}
+          value={search}
+          onFocus={() => setShowSuggestions(true)}
         />
-      )}
+        {search && <FaTimes id="clear-icon" onClick={handleClear} />}
+        {showSuggestions && searchData.length > 0 && (
+          <div className="search_result">
+            {searchData.map((country, index) => (
+              <button
+                key={index}
+                className="search_suggestion_line"
+                onClick={() => handleSuggestionClick(country)}
+              >
+                {country.properties.name}
+              </button>
+            ))}
+          </div>
+        )}
+        {selectedCountry && (
+          <InfoBox
+            selectedCountry={selectedCountry}
+            populationData={populationData}
+            selectedCountryGBDYear={gdpData}
+            selectedCountryCode={selectedCountry.gu_a3}
+            closeInfoBox={closeInfoBox}
+            year={year}
+          />
+        )}
+      </div>
     </div>
   )
 }

@@ -21,6 +21,8 @@ import countries from '../data/countries.json'
 
 import InfoBox from './infoBox.js'
 
+import Search from './search.js'
+
 /**
  * Services to fetch data:
  * - Public debt data
@@ -295,6 +297,15 @@ const MapComponent = ({ year, heatmap }) => {
     setSelectedCountryCode(null)
   }
 
+  const handleMouseEnter = () => {
+    mapRef.current.scrollWheelZoom.disable()
+  }
+
+  const handleMouseLeave = () => {
+    mapRef.current.scrollWheelZoom.enable()
+  }
+
+
   if (loading) {
     return <div style={{ justifyContent: 'center', display: 'flex', margin: '3vh' }}><strong>Loading map...</strong></div>
   }
@@ -306,13 +317,16 @@ const MapComponent = ({ year, heatmap }) => {
 
   return (
     <div id='mapContainer'>
-      <div id="map"></div>
+      <div id="map">
+        <Search year={year} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}/>
+      </div>
       <InfoBox
         selectedCountry={selectedCountry}
         populationData={populationData[selectedCountryCode] !== undefined ? populationData[selectedCountryCode][year] : null}
         selectedCountryGBDYear={gdpData[selectedCountryCode] !== undefined ? gdpData[selectedCountryCode][year] : null}
         selectedCountryCode={selectedCountryCode}
         cgDebt={centralGovernmentDebtData[selectedCountryCode] !== undefined ? centralGovernmentDebtData[selectedCountryCode][year] : null}
+        ggDebt={publicDebtData[selectedCountryCode] !== undefined ? publicDebtData[selectedCountryCode][year] : null}
         publicDebt={publicDebtData}
         centralGovDebt={centralGovernmentDebtData}
         closeInfoBox={closeInfoBox}

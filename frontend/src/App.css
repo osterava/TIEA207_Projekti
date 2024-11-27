@@ -1,4 +1,3 @@
-/* Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -6,255 +5,295 @@
 }
 
 body, html, #root {
+  margin-top: 0;
+  padding-top: 0;
   height: 100%;
   width: 100%;
-  font-family: Arial, sans-serif;
+  background-color: darkseagreen;
 }
 
+/* Default Design */
 .app {
+  /* To make all elements center */
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1% 5%;
+  font-size: 30px;
+  color: black;
+}
+
+/* Header Design */
+.header {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: #F7F6F3;
-  box-sizing: border-box;
 }
 
-/* Header Styling */
-.header {
-  width: 100%;
-  height: 10%; /* Reserve consistent height */
-  background-color: #F7F6F3;
-  display: flex;
-  flex-direction: column; /* Stack title and slider vertically */
-  align-items: center;
-  justify-content: space-evenly;
-  border-bottom: 1px solid #ccc;
-  padding: 1vh 1vw; /* Add padding for spacing */
-  margin: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for hierarchy */
-  box-sizing: border-box;
-  gap: 0;
-}
-
-.header div {
+#header-top-row {
   display: flex;
   flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-  width: 100%; /* Full-width layout for title and button */
 }
 
-.header h1 {
-  font-size: 1.5rem; /* Adjustable font size */
-  margin: 0;
-  color: #2A2B2A;
+#header-top-row h1 {
+  font-size: 45px;
+  color: black;
+  margin: 0 10px 0 0;
 }
 
-.header button {
-  background-color: #007BFF; /* Primary blue */
-  color: white;
+#header-top-row button {
+  font-size: 20px;
+  color: black;
+  background-color: white;
   border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 0 0 0 10px;
+  max-width: 50%;
 }
 
-.header button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+.header p {
+  font-size: 15px;
 }
 
-.header button:active {
-  background-color: #004080; /* Even darker blue on active state */
-}
-
-/* Footer */
-.footer {
+.show-header-desc {
   width: 100%;
-  height: 10%; /* Reserve space for the footer */
-  background-color: #F7F6F3;
-  color: #2A2B2A; 
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-top: 1px solid #ccc;
-  box-sizing: border-box;
-  margin: 2px 0 0 0;
+  height: auto;
+  opacity: 1;
+  overflow-y: hidden;
+  transition: height 0.5s ease, opacity 0.5s ease;
 }
 
-.footer-content {
+.hide-header-desc {
+  width: 100%;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 0.5s ease, opacity 0.5s ease;
+}
+
+/* Slider Design */
+
+#sliderWrapper {
   display: flex;
-  flex-direction: column; /* Stack items vertically */
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  font-size: 0.9rem; /* Reduce font size */
-  gap: 0; /* Reduce spacing between elements */
-  margin: 0;
-  padding: 0;
+}
+
+#sliderWrapper span {
+  margin: 5px;
+  font-size: 25px;
+  color: black;
+}
+
+#sliderInnerWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#slider {
+  width: 50%;
+}
+
+#yearButtons {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#yearButtons button {
+  font-size: 20px;
+  color: black;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+/* InfoBox */
+
+#info-box {
+  background: tan;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid black;
+  padding: 5px;
+  margin: 5px 0;
+  position: relative;
+  opacity: 1;
+  height: auto;
+  max-height: 70%;
+  transition: height 0.5s ease, opacity 0.5s ease;
+  overflow-y: auto;
+}
+
+#info-box.hidden {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  transition: none;
+}
+
+#info-box p {
+  font-size: 20px;
+  color: black;
+}
+
+#info-box h2 {
+  font-size: 30px;
+  color: black;
+}
+
+#info-box button {
+  height: 30px;
+  min-width: 40px;
+  background: tomato;
+  border: none;
+  border-radius: 5px;
+  margin: 10px 0 0 0;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* DebtChart */
+
+#debtChart {
+  min-height: 250px;
+}
+
+/*Map Component*/
+
+#mapContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  height: 100%;
+  margin: 5px 0 0;
+}
+
+/*Map*/
+
+#map {
+  flex: 1;
+  width: 100%;
+  min-height: 30%;
+  height: 100%;
+  border: 3px solid black;
+  position: relative;
+}
+
+/* Search */
+
+.search {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.searchWrapper {
+  position: relative;
+}
+
+.search input {
+  background-color: white;
+  border-radius: 10px;
+  height: 2.5rem;
+  padding: 0 15px;
+  align-items: center;
+  border: none;
+  box-shadow: 0px 0px 8px;
+  margin-left: 15px;
+  width: auto;
+}
+
+input:focus {
+  outline: none;
+}
+
+.search_suggestion_line {
+  display: block; /* Tee elementistä samanlainen kuin linkki */
+  background: none; /* Poistaa oletuspainikkeen taustavärin */
+  border: none; /* Poistaa oletuspainikkeen reunukset */
+  text-align: left; /* Varmistaa, että teksti on vasemmassa reunassa */
+  width: 100%; /* Vie koko käytettävissä olevan tilan */
+  padding: 10px; /* Lisää mukavasti tilaa ympärille */
+  cursor: pointer; /* Lisää linkkimäinen kursori */
+  text-decoration: none; /* Poistaa mahdollisen alleviivauksen */
+  color: inherit; /* Käyttää perittyä tekstin väriä */
+}
+
+.search_suggestion_line:hover {
+  background-color: #bec2c5;
+}
+
+.search_result {
+  position: absolute; /* Näytä hakutulokset suhteessa .input-wrapper-komponenttiin */
+  z-index: 1000; /* Hakutulokset näkyvät muiden elementtien päällä */
+  background-color: #fff;
+  max-height: 200px; /* Rajoittaa listan korkeutta */
+  overflow-y: auto; /* Lisää pystysuuntainen vieritys */
+  width: 90%;
+  right: 0;
+  border-radius: 10px;
+}
+
+#clear-icon {
+  position: absolute;
+  cursor: pointer;
+  font-size: 16px;
+  top: 10px;
+  right: 5px;
+}
+
+/* Footer Design */
+
+.footer {
+  display: flex;
+  flex-direction: column;
 }
 
 .names_header {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 0;
-  font-size: 0.8rem; /* Smaller text for names header */
 }
 
-.licences {
-  width: 30px; /* Reduce image size */
-  height: 30px;
+.names_header p {
+  font-size: 12px;
+  color: black;
 }
 
-
-/* Map Component */
-#mapContainer {
+.license_tab {
   display: flex;
-  flex-direction: row-reverse;
-  flex: 1; /* Take up the remaining space */
-  margin: 0;
-  padding: 2vh 2vw;
-  background-color: #ddf;
-  overflow: hidden;
-  box-sizing: border-box;
+  gap: 5px;
+  justify-content: center;
 }
 
-#map {
-  flex: 1; /* Automatically expand to available space */
-  width: 100%;
-  height: 100%;
-  border: 2px solid #2A2B2A;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  box-sizing: border-box;
+.licenses {
+  width: 20px;
+  height: 20px;
 }
 
-/* Info Box */
-#info-box {
-  display: flex;
-  flex-direction: column;
-  width: 30%;
-  height: 100%; /* Adjust to content height */
-  max-height: 80vh;
-  transition: width 0.5s ease, opacity 0.5s ease;
-  opacity: 1;
-  background-color: #fff; /* Background for clarity */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow for visual hierarchy */
-  overflow-y: auto; /* Allow scrolling for long content */
-}
-
-#info-box > div {
-  padding: 1rem;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-#info-box.hidden {
-  width: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: none;
-}
-
-/* Button Styling */
-#info-box button {
-  background-color: #f44336; /* Red close button */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  margin: 1vh 1vw;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-}
-
-#info-box button:hover {
-  background-color: #d32f2f; /* Darker red on hover */
-}
-
-/* Text Content */
-#info-box h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-#info-box p {
-  font-size: 1rem;
-  margin: 0.5rem 0;
-}
-
-/* Debt Chart */
-#debtChart {
-  width: 100%;
-  height: 300px; /* Fixed height */
-  max-height: 80vh; /* Constrain height to 80% of the viewport */
-  overflow-y: hidden; /* Prevent content from overflowing vertically */
-  margin: 1vh 1vw;
-  box-sizing: border-box;
-}
-
-#debtChart canvas {
-  width: 100%; /* Ensure the canvas fills the parent's width */
-  height: 100%; /* Make canvas height proportional to the parent */
-  max-height: 100%; /* Prevent canvas from exceeding parent height */
-  box-sizing: border-box; /* Include padding and border in size calculation */
-}
-
-/* Slider Component */
-#sliderWrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center !important;
-  align-items: center;
-  padding: 0.5rem 0;
-  margin: 0 1vw;
-}
-
-#slider {
-  width: 90%; /* Occupy most of the header width */
-  height: 0.5rem;
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: #ccc;
-  border-radius: 4px;
-  outline: none;
-  margin: 0.5rem 0.5rem;
-}
-
-#slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  background-color: #007BFF;
-  border: none;
-  border-radius: 50%;
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-}
-
-#slider::-moz-range-thumb {
-  background-color: #007BFF;
-  border: none;
-  border-radius: 50%;
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-}
-
-/* Tooltip Styles */
 .tooltip {
-  position: relative;
+  font-size: 12px;
   cursor: pointer;
-  padding: 0;
-  margin: 0;
+  position: relative;
 }
 
 .tooltip::after {
   content: attr(data-tooltip);
+  width: 200px;
   position: absolute;
   bottom: 150%;
   left: 50%;
@@ -262,7 +301,7 @@ body, html, #root {
   background-color: #333;
   color: #fff;
   border-radius: 4px;
-  font-size: 0.8em;
+  font-size: 12px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease-in-out;
@@ -270,12 +309,6 @@ body, html, #root {
 
 .tooltip:hover::after {
   opacity: 1;
-}
-
-*,
-*:focus,
-*:hover {
-    outline: none;
 }
 
 .labelstyle {
@@ -288,184 +321,73 @@ body, html, #root {
   text-align: center;
 }
 
-/* Responsive Design */
-
-/* Portrait Mode */
-@media (orientation: portrait) {
+/* For Desktop View */
+@media screen and (min-width: 1024px) and (orientation: landscape) {
   #mapContainer {
-    flex-direction: column-reverse;
-    height: calc(100% - 20vh); /* Account for header and footer height */
-  }
-
-  #map {
-    flex: 1;
-    height: 100%;
-    width: 100%;
-  }
-
-  .header, .footer {
-    height: 10vh; /* Standardized height for header and footer */
+    flex-direction: row-reverse;
   }
 
   #info-box {
-    width: 100%;
-    height: 50%;
-    padding: 0;
+    transition: width 0.2s ease, opacity 0.2s ease;
+    max-height: 100%;
+    height: 100%;
+    width: 30%;
+    max-width: 70%;
     margin: 0;
+    padding: 10px;
+  }
+
+
+  #debtChart {
+    flex: 1;
+    width: 100%;
+  }
+
+  #sliderInnerWrapper {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #slider {
+    width: 50%;
+  }
+
+  #yearButtons {
+    width: 50%;
+  }
+
+  #yearButtons button {
+    width: 100px;
+  }
+
+  .show-header-desc {
+    width: 100%;
+    height: auto;
+    opacity: 1;
+    overflow-y: hidden;
     transition: height 0.5s ease, opacity 0.5s ease;
   }
 
-  #info-box.hidden {
-    width: 0;
-    height: 0;
-    padding: 0;
-  }
-
-  .header h1 {
-    font-size: 2rem; /* Slightly smaller font for portrait */
-  }
-
-  #slider {
-    width: 80%; /* Slightly reduced width */
+  .hide-header-desc {
+    width: 100%;
+    height: auto;
+    opacity: 1;
+    overflow-y: hidden;
+    transition: height 0.5s ease, opacity 0.5s ease;
   }
 }
 
-/* Landscape Mode */
-@media (orientation: landscape) {
-  #mapContainer {
-    flex: 1;
-    height: calc(100% - 20vh); /* Ensure header/footer still apply */
-  }
+/* For Tablet View */
+@media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
 
-  #map {
-    flex: 1;
-    min-height: auto; /* Map height adjusts naturally in landscape */
-    width: auto;
-  }
-
-  .header, .footer {
-    height: 10vh; /* Standardized height for header and footer */
-  }
-
-  #info-box {
-    width: 30%;
-    max-height: 100%;
-  }
-
-  .header h1 {
-    font-size: 1.5rem; /* Standard font size */
-  }
-
-  #slider {
-    width: 90%; /* Full slider width for landscape */
-  }
-
-  .footer {
-    justify-self: flex-end;
-  }
 }
 
-#slider {
-  width: 80vw;
-  margin-left: 10vw;
-  margin-right: 1vw;
-  margin-bottom: 1vh;
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
+/* For Mobile Portrait View min-width=320px */
+@media screen and (max-device-width: 480px) and (orientation: portrait) {
+
 }
 
-input[type="range"]::-webkit-slider-runnable-track {
-  background: #053a5f;
-  height: 0.5rem;
-}
+/* For Mobile Landscape View */
+@media screen and (max-device-width: 640px) and (orientation: landscape) {
 
-input[type="range"]::-moz-range-track {
-  background: #053a5f;
-  height: 0.5rem;
-}
-
-.header > button {
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-bottom: 20px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-weight: 700;
-  transition: 0.3s ease-in-out;
-  border-radius: 7px;
-}
-
-.toggleoff {
-  background-color: #370031;
-  color: #F7F6F3;
-}
-
-.toggleoff:hover {
-  background-color: #d62839;
-  color: #F7F6F3;
-}
-
-.toggleoff:active {
-  background-color: #20001d;
-  color: #F7F6F3;
-}
-
-.toggleon {
-  background-color: #d62839;
-  color: #F7F6F3;
-}
-
-.toggleon:hover {
-  background-color: #ec3a4c;
-  color: #F7F6F3;
-}
-
-.toggleon:active {
-  background-color: #a80d1c;;
-  color: #F7F6F3;
-}
-
-.header > button {
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-bottom: 20px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-weight: 700;
-  transition: 0.3s ease-in-out;
-  border-radius: 7px;
-}
-
-.toggleoff {
-  background-color: #370031;
-  color: #F7F6F3;
-}
-
-.toggleoff:hover {
-  background-color: #d62839;
-  color: #F7F6F3;
-}
-
-.toggleoff:active {
-  background-color: #20001d;
-  color: #F7F6F3;
-}
-
-.toggleon {
-  background-color: #d62839;
-  color: #F7F6F3;
-}
-
-.toggleon:hover {
-  background-color: #ec3a4c;
-  color: #F7F6F3;
-}
-
-.toggleon:active {
-  background-color: #a80d1c;;
-  color: #F7F6F3;
 }
