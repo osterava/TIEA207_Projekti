@@ -1,5 +1,6 @@
 import React from 'react'
 import Slider from './Slider'
+import HeatmapButton from './HeatmapButton'
 
 /**
  * The Header component contains the title, a year slider, and a button to toggle the heatmap display.
@@ -11,22 +12,22 @@ import Slider from './Slider'
  */
 const Header = ({ year, setYear, heatmap, setHeatmap }) => {
 
-  /**
-   * Toggles the heatmap display between true and false when the button is clicked.
-   */
-  const onHeatmapToggle = () => {
-    setHeatmap(!heatmap)
-  }
-
   return (
     <header className='header'>
-      <div>
-        <h1>DebtMap - View Annual Debt Statistics</h1>
-        <button onClick={onHeatmapToggle}>{heatmap ? 'Show CENTRAL government debt' : 'Show GENERAL government debt'}</button>
-      </div>
+      <h1>DebtMap</h1>
+      <p className="header_description">
+        Explore and visualize global economic data including Gross General Debt, Central Government Debt, Population
+        and GDP. Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
+        IMF Open Data API
+        </a>.
+      </p>
       <Slider
         year={year}
         setYear={setYear}
+      />
+      <HeatmapButton
+        heatmap={heatmap}
+        setHeatmap={setHeatmap}
       />
     </header>
   )
