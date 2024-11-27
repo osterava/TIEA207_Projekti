@@ -282,7 +282,7 @@ const MapComponent = ({ year, heatmap }) => {
       const mapElement = document.getElementById('map')
 
       if (mapElement) {
-        const map = L.map(mapElement).setView([40, 5], 3)
+        const map = L.map(mapElement).setView([40, 5], 2)
 
         // Jostain syystä hajoittaa koodin: 'el is not defined' tms.
         //map.setMinZoom(3)

@@ -15,6 +15,12 @@ const Header = ({ year, setYear, heatmap, setHeatmap }) => {
   return (
     <header className='header'>
       <h1>DebtMap</h1>
+      <p className="header_description">
+        Explore and visualize global economic data including Gross General Debt, Central Government Debt, Population
+        and GDP. Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
+        IMF Open Data API
+        </a>.
+      </p>
       <Slider
         year={year}
         setYear={setYear}
