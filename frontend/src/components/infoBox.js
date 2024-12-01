@@ -10,6 +10,11 @@ import DebtChart from './debtChart'
  * @param {string} selectedCountryCode The code for the selected country, used for fetching related data.
  * @param {function} closeInfoBox A function to close the info box when the close button is clicked.
  * @param {string} year The year for which population and GDP data is displayed.
+ * @param {number} cgDebt The central government debt as a percentage of GDP for the selected country.
+ * @param {number} ggDebt The general government debt as a percentage of GDP for the selected country.
+ * @param {object} centralGovDebt The central government debt data for all countries.
+ * @param {object} publicDebt The general government debt data for all countries
+ * @param {boolean} infoVisible A boolean value to determine if the info box should be visible.
  */
 const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, selectedCountryCode, closeInfoBox, year, cgDebt, ggDebt, centralGovDebt, publicDebt, infoVisible }) => {
 

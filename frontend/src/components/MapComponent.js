@@ -133,13 +133,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
   }
 
   var debt = debtData[feature.properties.gu_a3]
-  if (ggDebtData) {
-    for (var year in ggDebtData[feature.properties.gu_a3]) {
-      if (debt[year] === undefined) {
-        debt[year] = ggDebtData[feature.properties.gu_a3][year]
-      }
-    }
-  }
 
   if (ggDebtData) {
     if (debt) {
@@ -183,7 +176,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
  */
 const MapComponent = ({ year, heatmap }) => {
   const [publicDebtData, setPublicDebtData] = useState(null)
-  const [ggDebtData, setGGDebtData] = useState(null)
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
   const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
@@ -198,11 +190,23 @@ const MapComponent = ({ year, heatmap }) => {
    * Fetch all data that is needed to run the application
    */
   useEffect(() => {
+    // If data is already loaded, skip fetching
     if (!loading) return
     const fetchData = async () => {
       try {
-        const pdData = await getPublicDebtData()
-        var data = pdData.values.GGXWDG_NGDP
+
+        const ggDebtData1 = await getPublicDebtData()
+        var data = ggDebtData1.values.GGXWDG_NGDP
+        console.log(data)
+
+        const ggDebtData2 = await getGGDebtData()
+        for (var countryCode in data) {
+          for (var year in ggDebtData2.values[countryCode]) {
+            if (data[countryCode][year] === undefined) {
+              data[countryCode][year] = ggDebtData2.values[countryCode][year]
+            }
+          }
+        }
         setPublicDebtData(data)
         console.log('Debt data:', data)
 
@@ -220,11 +224,6 @@ const MapComponent = ({ year, heatmap }) => {
         data = cgDebtData.values.CG_DEBT_GDP
         setCentralGovernmentDebtData(data)
         console.log('Central government debt data:', data)
-
-        const ggDebtData = await getGGDebtData()
-        data = ggDebtData.values.GG_DEBT_GDP
-        setGGDebtData(data)
-        console.log('General government debt data (2):', data)
 
         setLoading(false)
       } catch (err) {
@@ -265,14 +264,14 @@ const MapComponent = ({ year, heatmap }) => {
         ggDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, true),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, ggDebtData)
+            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true)
         }).addTo(map)
 
         // Add GeoJSON layer with event handling
         cgDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, false),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, null)
+            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false)
         }).addTo(map)
       }
     }
@@ -289,7 +288,7 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
   const closeInfoBox = () => {
     setInfoVisible(false)
