@@ -221,15 +221,15 @@ input:focus {
 }
 
 .search_suggestion_line {
-  display: block; /* Tee elementistä samanlainen kuin linkki */
-  background: none; /* Poistaa oletuspainikkeen taustavärin */
-  border: none; /* Poistaa oletuspainikkeen reunukset */
-  text-align: left; /* Varmistaa, että teksti on vasemmassa reunassa */
-  width: 100%; /* Vie koko käytettävissä olevan tilan */
-  padding: 10px; /* Lisää mukavasti tilaa ympärille */
-  cursor: pointer; /* Lisää linkkimäinen kursori */
-  text-decoration: none; /* Poistaa mahdollisen alleviivauksen */
-  color: inherit; /* Käyttää perittyä tekstin väriä */
+  display: block;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .search_suggestion_line:hover {
@@ -237,11 +237,11 @@ input:focus {
 }
 
 .search_result {
-  position: absolute; /* Näytä hakutulokset suhteessa .input-wrapper-komponenttiin */
-  z-index: 1000; /* Hakutulokset näkyvät muiden elementtien päällä */
+  position: absolute;
+  z-index: 1000;
   background-color: #fff;
-  max-height: 200px; /* Rajoittaa listan korkeutta */
-  overflow-y: auto; /* Lisää pystysuuntainen vieritys */
+  max-height: 200px;
+  overflow-y: auto;
   width: 90%;
   right: 0;
   border-radius: 10px;
@@ -253,6 +253,17 @@ input:focus {
   font-size: 16px;
   top: 10px;
   right: 5px;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 1.2rem;
+  color: #888;
 }
 
 /* Footer Design */
