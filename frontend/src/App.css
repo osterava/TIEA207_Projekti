@@ -328,6 +328,12 @@ input:focus {
   opacity: 1;
 }
 
+*,
+*:focus,
+*:hover {
+    outline: none;
+}
+
 .labelstyle {
   background-color: white;
   color: black;
