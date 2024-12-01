@@ -13,34 +13,5 @@ export const getData = async () => {
   return response.data
 }
 
-/**
- * Fetches population data for a specific country and year.
- * This function filters the population data by the provided `year` and `countryCode`,
- * and returns the population data for the specified country in the requested year.
- * @param {number} year The year for which population data is required.
- * @param {string} countryCode The country code for the specific country.
- * @returns {Object} An object containing the population data for the specified country and year.
- */
-export const getDataByYear = async (year, countryCode) => {
-  const rawData = await getData()
-  const result = {}
-
-  for (const region in rawData.values) {
-    if (rawData.values[region][countryCode]) {
-      const populationData = rawData.values[region][countryCode][year]
-
-      if (populationData !== undefined) {
-        if (!result[region]) {
-          result[region] = {}
-        }
-        result[region][countryCode] = populationData
-      }
-    }
-  }
-
-  return result
-}
-
-
-const dataService = { getData, getDataByYear }
+const dataService = { getData }
 export default dataService

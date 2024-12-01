@@ -1,66 +1,91 @@
+/**
+ * React and hooks import for managing component state and lifecycle.
+ */
+
 import React, { useEffect, useRef, useState } from 'react'
+
+/**
+ * Leaflet library for interactive maps and required CSS for styling.
+*/
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import mapService from '../services/mapService.js'
-import populationService from '../services/popService.js'
-import gdpService from '../services/gdpService.js'
+
+/**
+ * JSON file containing geographical data for countries.
+ */
 import countries from '../data/countries.json'
+
+/**
+ * Custom InfoBox component to display detailed information about selected countries.
+ */
+
 import InfoBox from './infoBox.js'
-import { getData } from '../services/debtService.js'
-import { debounce } from 'lodash'
+
+import Search from './search.js'
+
+/**
+ * Services to fetch data:
+ * - Public debt data
+ * - GDP data
+ * - Population data
+ * - Central government debt data
+ * - GeoJSON map data
+ */
+import { getData as getPublicDebtData } from '../services/publicDebtService.js'
+import { getData as getGDPData } from '../services/gdpService.js'
+import { getData as getPopulationData } from '../services/popService.js'
+import { getData as getCGDebtData } from '../services/cgDebtService.js'
+import { getGGDebtData } from '../services/publicDebtService.js'
 
 
 /**
  * Debugattavaa / TODO:
- * vuoden vaihtaminen päivittää kartan, mutta ei päivitä maan tietoja
- * vuoden vaihtaminen esim. 2019 -> 2011, ohjelma jää vuodelle 2015
  * -> ei renderöi VIIMEISINTÄ vuotta, vaan jonkin vuoden, jonka aloitti renderöimään aiemmin
  * | Täytyy selvittää syy, miksi vuoden päivittyminen sekoittaa layerit (useEffect kesken?)
  * Maan nopea valitseminen edellisen valinnan jälkeen sekoittaa maiden tiedot
  * -> Konsolista näkee "Fetched GDP data väärältä maalta viimeiseksi valitun maan sijaan"
  * | Täytyy ehkä ladata debtDatan mukaisesti ladata kaikki data MapComponenttin, jotta pyynnöt eivät sekoitu
  * TL;DR: API data pitää ehkä ladata suoraan MapComponenttiin,
- * kartta jää harmaaksi kun painaa infoboksin kiinni
  */
 
 /**
  * GeoJson initial layer generation
  */
-var defaultGeoJsonLayer = null
-var heatmapGeoJsonLayer = null
+var cgDebtHeatmapLayer = null
+var ggDebtHeatmapLayer = null
 
 /**
  * Apply heatmap style based on the country's debt.
  * @param {*} feature GeoJSON feature representing a country.
  * @param {number} year The selected year to display debt data.
  */
-const applyHeatmapStyle = (feature, year) => {
-  console.log('Feature:', feature, 'Year:', year) // Debugging line to check values
-
+const applyHeatmapStyle = (feature, year, isGGDebt) => {
   let fillColor = 'black'
 
-  if (feature && feature.properties && feature.properties.debt && feature.properties.debt[year] !== undefined) {
-    const debt = feature.properties.debt[year]
-
-    if (debt > 100) {
-      fillColor = '#ff0d0d'
-    } else if (debt > 85) {
-      fillColor = '#ff4e11'
-    } else if (debt > 70) {
-      fillColor = '#ff8e15'
-    } else if (debt > 55) {
-      fillColor = '#fab733'
-    } else if (debt > 40) {
-      fillColor = '#acb334'
-    } else if (debt > 25) {
-      fillColor = '#69b34c'
-    } else if (debt > 10) {
-      fillColor = '#3baf4a'
-    } else if (debt > 0) {
-      fillColor = 'green'
-    } else {
-      fillColor = 'black'
-    }
+  let debt = 0
+  if (isGGDebt && feature && feature.properties && feature.properties.debtGG && feature.properties.debtGG[year] !== undefined) {
+    debt = feature.properties.debtGG[year]
+  } else if (!isGGDebt && feature && feature.properties && feature.properties.debtCG && feature.properties.debtCG[year] !== undefined) {
+    debt = feature.properties.debtCG[year]
+  }
+  if (debt > 100) {
+    fillColor = '#ff0d0d'
+  } else if (debt > 85) {
+    fillColor = '#ff4e11'
+  } else if (debt > 70) {
+    fillColor = '#ff8e15'
+  } else if (debt > 55) {
+    fillColor = '#fab733'
+  } else if (debt > 40) {
+    fillColor = '#acb334'
+  } else if (debt > 25) {
+    fillColor = '#69b34c'
+  } else if (debt > 10) {
+    fillColor = '#3baf4a'
+  } else if (debt > 0) {
+    fillColor = 'green'
+  } else {
+    fillColor = 'black'
   }
 
   return {
@@ -93,80 +118,16 @@ function getColor(d) {
  * Highlight function to style the selected country
  * @param {*} e
  */
-function highlightFeature(e) {
+function highlightFeatureHeatmap(e) {
   var layer = e.target
 
   layer.setStyle({
     weight: 5,
-    // fillcolor: 'red'
-    fillColor: '#BF4342',
-    fillOpacity: 1,
+    fillColor: '#fff',
+    fillOpacity: 0.3,
   })
 
   layer.bringToFront()
-}
-
-/**
- * Reset highlight style
- * @param {*} e
- */
-function resetHighlight(e) {
-  defaultGeoJsonLayer.resetStyle(e.target)
-}
-
-/**
- * Fetch both population and GDP data for a selected country and year.
- * @param {string} countryCode The country code.
- * @param {number} year The selected year.
- * @param {function} setPopulationData State updater for population data.
- * @param {function} setCountryGBDYear State updater for GDP data.
- */
-async function fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear) {
-  try {
-    const populationData = await fetchPopulationData(countryCode, year)
-    setPopulationData(populationData)
-    const gdpData = await fetchGDPData(countryCode, year)
-    setCountryGBDYear(gdpData)
-  } catch (error) {
-    console.error('Error fetching country data:', error)
-    setPopulationData('Error fetching data')
-    setCountryGBDYear('Error fetching data')
-  }
-}
-
-/**
- * Fetch population data for a specific country and year.
- * @param {string} countryCode The country code.
- * @param {number} year The selected year.
- * @returns {Promise} Population data or an error message.
- */
-async function fetchPopulationData(countryCode, year) {
-  try {
-    const data = await populationService.getDataByYear(year, countryCode)
-    const regionKey = 'LP'
-    return data[regionKey] ? data[regionKey][countryCode] : 'No data available for this country'
-  } catch (error) {
-    console.error('Error fetching population data:', error)
-    return 'Error fetching data'
-  }
-}
-
-/**
- * Fetch GDP data for a specific country and year.
- * @param {string} countryCode The country code.
- * @param {number} year The selected year.
- * @returns {Promise} GDP data or an error message.
- */
-async function fetchGDPData(countryCode, year) {
-  try {
-    const data = await gdpService.getGDPByYear(year - 1, countryCode)
-    const regionKey = 'NGDPD'
-    const gdpValue = data[regionKey] ? data[regionKey][countryCode] : 'No data available'
-    return gdpValue
-  } catch (error) {
-    console.error('Error fetching GDP data:', error)
-    return 'Error fetching data'
-  }
 }
 
 /**
@@ -176,32 +137,43 @@ async function fetchGDPData(countryCode, year) {
  * @param {*} layer Leaflet layer for the country.
  * @param {*} setSelectedCountry State updater for selected country.
  * @param {*} setInfoVisible State updater for info box visibility.
- * @param {*} setPopulationData State updater for population data.
  * @param {*} setSelectedCountryCode State updater for selected country code.
  * @param {*} setCountryGBDYear State updater for selected country GDP data.
- * @param {*} debtData Data related to country debt.
+ * @param {*} publicDebtData Data related to country debt.
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, debtData, year, mapRef) {
-  if (!debtData || !feature || !feature.properties) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData) {
+  if (!debtData || !feature || !feature.properties ) {
     console.error('Missing debt data or feature properties')
     return
   }
 
-  const debt = debtData[feature.properties.gu_a3]
-  if (debt) {
-    feature.properties.debt = debt
-  } else {
-    console.error('Debt data not available for country', feature.properties.gu_a3)
+  if (feature.properties.name) {
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'auto', className:'labelstyle', sticky: true  })
   }
+
+  var debt = debtData[feature.properties.gu_a3]
+
+  if (ggDebtData) {
+    if (debt) {
+      feature.properties.debtGG = debt
+    } else {
+      // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
+    }
+  } else {
+    if (debt) {
+      feature.properties.debtCG = debt
+    } else {
+      // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
+    }
+  }
+
 
   layer.on({
     click: () => {
       setSelectedCountry(null)
-      setPopulationData(null)
       setSelectedCountryCode(null)
-      setCountryGBDYear(null)
 
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
@@ -209,102 +181,71 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setP
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
-      fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
-    }
-  })
-}
-
-
-/**
- * Assign event handlers to each feature (country) in the map.
- * @param {*} feature GeoJSON feature representing a country.
- * @param {*} layer Leaflet layer for the country.
- * @param {*} setSelectedCountry State updater for selected country.
- * @param {*} setInfoVisible State updater for info box visibility.
- * @param {*} setPopulationData State updater for population data.
- * @param {*} setSelectedCountryCode State updater for selected country code.
- * @param {*} setCountryGBDYear State updater for selected country GDP data.
- * @param {number} year The selected year.
- * @param {*} mapRef Reference to the map object.
- */
-function onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData, setSelectedCountryCode, setCountryGBDYear, year, mapRef) {
-  const { gu_a3: countryCode, name: countryName } = feature.properties
-
-  layer.on({
-    click: () => {
-      resetData()
-      setSelectedCountry(feature.properties)
-      setInfoVisible(true)
-      setSelectedCountryCode(countryCode)
-
-      if (mapRef.current && feature.geometry) {
-        const bounds = L.geoJSON(feature.geometry).getBounds()
-        let center = bounds.getCenter()
-        center = L.latLng(center.lat, center.lng + 50)
-        mapRef.current.setView(center, 4)
-      }
-      fetchCountryData(countryCode, year, setPopulationData, setCountryGBDYear)
+      highlightFeatureHeatmap({ target: layer })
     },
-    mouseover: highlightFeature,
+    mouseover: highlightFeatureHeatmap,
     mouseout: resetHighlight,
   })
-
-  function resetData() {
-    setSelectedCountry(null)
-    setPopulationData(null)
-    setSelectedCountryCode(null)
-    setCountryGBDYear(null)
-  }
-}
-
-
-
-/**
- * Get style for the GeoJSON layer
- * @returns Style object
- */
-function defaultStyle() {
-  return {
-    //fillcolor: 'grey'
-    fillColor: '#818D92',
-    weight: 2,
-    opacity: 1,
-    // color: white
-    color: '#222222',
-    fillOpacity: 1,
-  }
 }
 
 /**
- * Main component for displaying the map and managing country data.
- * @param {year,heatmap} props The props passed to the component.
+ * React component for the map.
+ * Manages the visualization of countries, data fetching, and user interaction.
+ * @param {Object} props - Component properties.
+ * @param {number} props.year - The selected year for data visualization.
+ * @param {boolean} props.heatmap - Flag to toggle heatmap visualization.
  */
 const MapComponent = ({ year, heatmap }) => {
+  const [publicDebtData, setPublicDebtData] = useState(null)
   const [populationData, setPopulationData] = useState(null)
-  const [mapData, setMapData] = useState(null)
+  const [gdpData, setGDPData] = useState(null)
+  const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
   const [infoVisible,   setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
-  const [selectedCountryGBDYear,setCountryGBDYear] = useState(null)
-  const [debtData, setDebtData] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const mapRef = useRef(null)
 
-  // TODO: debtDatan mukaisesti populointi ja gdp datan haku ja asettaminen
+  /**
+   * Fetch all data that is needed to run the application
+   */
   useEffect(() => {
+    // If data is already loaded, skip fetching
     if (!loading) return
     const fetchData = async () => {
       try {
-        const result = await getData()
-        var data = result.values.GGXWDG_NGDP
-        setDebtData(data)
+
+        const ggDebtData1 = await getPublicDebtData()
+        var data = ggDebtData1.values.GGXWDG_NGDP
+        console.log(data)
+
+        const ggDebtData2 = await getGGDebtData()
+        for (var countryCode in data) {
+          for (var year in ggDebtData2.values[countryCode]) {
+            if (data[countryCode][year] === undefined) {
+              data[countryCode][year] = ggDebtData2.values[countryCode][year]
+            }
+          }
+        }
+        setPublicDebtData(data)
+        console.log('Debt data:', data)
+
+        const popData = await getPopulationData()
+        data = popData.values.LP
+        setPopulationData(data)
+        console.log('Population data:', data)
+
+        const gdp_Data = await getGDPData()
+        data = gdp_Data.values.NGDPD
+        setGDPData(data)
+        console.log('GDP data:', data)
+
+        const cgDebtData = await getCGDebtData()
+        data = cgDebtData.values.CG_DEBT_GDP
+        setCentralGovernmentDebtData(data)
+        console.log('Central government debt data:', data)
+
         setLoading(false)
       } catch (err) {
         console.error(err)
@@ -313,13 +254,19 @@ const MapComponent = ({ year, heatmap }) => {
     }
 
     fetchData()
-  }, [loading,year])
+  }, [loading])
 
   useEffect(() => {
     if (loading) return
 
-    mapService.getMapData().then(data => {
-      setMapData(data)
+    /**
+     * Reset highlight style
+     * @param {*} e
+     */
+    function resetHighlight(e) {
+      if (!heatmap) cgDebtHeatmapLayer.resetStyle(e.target)
+      else ggDebtHeatmapLayer.resetStyle(e.target)
+    }
 
       if (mapRef.current === null) {
         const mapElement = document.getElementById('map')
@@ -328,14 +275,12 @@ const MapComponent = ({ year, heatmap }) => {
         const bounds = L.latLngBounds(southWest, northEast)
         const legend = L.control({ position: 'bottomright' })
 
-        if (mapElement) {
-          const map = L.map(mapElement).setView([30, 5], 2)
-          // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          // attribution: '© OpenStreetMap contributors',
-          // }).addTo(map)
+      if (mapElement) {
+        const map = L.map(mapElement).setView([40, 5], 2)
 
-          map.setMinZoom(3)
-          map.setMaxZoom(7)
+        // Jostain syystä hajoittaa koodin: 'el is undefined'
+        //map.setMinZoom(3)
+        //map.setMaxZoom(7)
 
           mapRef.current = map
 
@@ -354,36 +299,41 @@ const MapComponent = ({ year, heatmap }) => {
           }
           legend.addTo(map)
 
-          // Add GeoJSON layer with heatmap style
-          // TODO: Selvitä miksi heatmap ei toimi
-          heatmapGeoJsonLayer = L.geoJson(countries, {
-            style: (feature) => applyHeatmapStyle(feature, year),
-            onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
-              setSelectedCountryCode,setCountryGBDYear, debtData, year, mapRef)
-          }).addTo(map)
-
-          // Add GeoJSON layer with event handling
-          defaultGeoJsonLayer = L.geoJson(countries, {
-            style: defaultStyle,
-            onEachFeature: (feature, layer) =>
-              onEachFeature(feature, layer, setSelectedCountry, setInfoVisible, setPopulationData,
-                setSelectedCountryCode,setCountryGBDYear, year, mapRef)
-          }).addTo(map)
+        // Create and add legend to the map using leaflet's DomUtil
+        legend.onAdd = () => {
+          let div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 10, 25, 40, 55, 70, 85, 100]
+          div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data<br />'
+          // Get colors for the intervals
+          for (let i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
+          }
+          return div
         }
+        legend.addTo(map)
 
-        debounceHeatmap()
-      }
-    })
+        ggDebtHeatmapLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year, true),
+          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true)
+        }).addTo(map)
 
-    const debounceHeatmap = debounce(() => {
-      if (heatmap) {
-        heatmapGeoJsonLayer.setStyle((feature) => applyHeatmapStyle(feature, year))
-        heatmapGeoJsonLayer.bringToFront()
-      } else {
-        defaultGeoJsonLayer.setStyle(defaultStyle)
-        defaultGeoJsonLayer.bringToFront()
+        // Add GeoJSON layer with event handling
+        cgDebtHeatmapLayer = L.geoJson(countries, {
+          style: (feature) => applyHeatmapStyle(feature, year, false),
+          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false)
+        }).addTo(map)
       }
-    })
+    }
+
+    if (heatmap) {
+      ggDebtHeatmapLayer.bringToFront()
+    } else {
+      cgDebtHeatmapLayer.bringToFront()
+    }
 
     return () => {
       if (mapRef.current !== null) {
@@ -391,53 +341,56 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-
-  }, [loading,debtData, year, heatmap])
-
-  const resetMapView = () => {
-    if (mapRef.current) {
-      const southWest = L.latLng(-65.98155760646617, -200)
-      const northEast = L.latLng(89.99346179538875, 200)
-      const bounds = L.latLngBounds([southWest, northEast])
-      mapRef.current.fitBounds(bounds)
-    }
-  }
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
 
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
-    setPopulationData(null)
     setSelectedCountryCode(null)
-    setCountryGBDYear(null)
-    resetMapView()
   }
 
+  const handleCountrySelect = (country, countryCode) => {
+    setSelectedCountry(country)
+    setSelectedCountryCode(countryCode)
+    setInfoVisible(true)
+  }
+
+  const handleMouseEnter = () => {
+    mapRef.current.scrollWheelZoom.disable()
+  }
+
+  const handleMouseLeave = () => {
+    mapRef.current.scrollWheelZoom.enable()
+  }
+
+
   if (loading) {
-    return <div>Loading...</div>
+    return <div style={{ justifyContent: 'center', display: 'flex', margin: '3vh' }}><strong>Loading map...</strong></div>
   }
 
   /**
    * Bugia: harmaita kohtia jää karttaan infoboxin sulkemisen jälkeen, saattaa olla vain livetestatessa css muuttaessa
    * <div style={{ display: 'flex', width: '100%' }}></div>
    */
+
   return (
-    <div className='midwrapper'>
-      <div id='map' style={{ width: infoVisible ? '60vw' : '90vw',
-        transition: 'width 0.3s ease'
-      }}/>
-
-      {infoVisible && (
-        <InfoBox
-          selectedCountry={selectedCountry}
-          populationData={populationData}
-          selectedCountryGBDYear={selectedCountryGBDYear}
-          selectedCountryCode={selectedCountryCode}
-          closeInfoBox={closeInfoBox}
-          year={year}
-        />
-      )}
-
-      {mapData && <p>{mapData.message}</p>}
+    <div id='mapContainer'>
+      <div id="map">
+        <Search onCountrySelect={handleCountrySelect} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
+      </div>
+      <InfoBox
+        selectedCountry={selectedCountry}
+        populationData={populationData[selectedCountryCode] !== undefined ? populationData[selectedCountryCode][year] : null}
+        selectedCountryGBDYear={gdpData[selectedCountryCode] !== undefined ? gdpData[selectedCountryCode][year] : null}
+        selectedCountryCode={selectedCountryCode}
+        cgDebt={centralGovernmentDebtData[selectedCountryCode] !== undefined ? centralGovernmentDebtData[selectedCountryCode][year] : null}
+        ggDebt={publicDebtData[selectedCountryCode] !== undefined ? publicDebtData[selectedCountryCode][year] : null}
+        publicDebt={publicDebtData}
+        centralGovDebt={centralGovernmentDebtData}
+        closeInfoBox={closeInfoBox}
+        year={year}
+        infoVisible={infoVisible}
+      />
     </div>
   )
 }

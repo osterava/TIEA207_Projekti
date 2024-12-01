@@ -9,7 +9,7 @@ const HeatmapButton = ({ heatmap, setHeatmap }) => {
 
   return (
     <>
-      <button className={heatmap ? 'toggleon' : 'toggleoff'} onClick={onHeatmapToggle}>Toggle Heatmap</button>
+      <button onClick={onHeatmapToggle}>{heatmap ? 'Show CG debt' : 'Show GG debt'}</button>
     </>
   )
 }

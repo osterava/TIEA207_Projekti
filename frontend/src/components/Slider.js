@@ -14,18 +14,38 @@ const Slider = ({ year, setYear }) => {
     setYear(parseInt(event.target.value))
   }
 
+  const min = 1990
+  const max = 2025
+
+  const incrementYear = () => {
+    if (year < max) setYear(year + 1)
+  }
+
+  const decrementYear = () => {
+    if (year > min) setYear(year - 1)
+  }
+
+
   return (
-    <div style={{ display: 'flex' }}>
-      <input
-        id="slider"
-        type="range"
-        min="1990"
-        max="2025"
-        aria-label={'Year slider from 1990 to 2025'}
-        value={year}
-        onChange={handleChange}
-      />
-      <span>{year}</span>
+    <div id="sliderWrapper">
+      <div id="sliderInnerWrapper">
+        <span>{min}</span>
+        <input
+          id="slider"
+          type="range"
+          min={min}
+          max={max}
+          aria-label={'Year slider from 1990 to 2025'}
+          value={year}
+          onChange={handleChange}
+        />
+        <span>{max}</span>
+      </div>
+      <div id="yearButtons">
+        <button onClick={decrementYear}>-</button>
+        <span style={{ margin: '0 1vw' }}>{year}</span>
+        <button onClick={incrementYear}>+</button>
+      </div>
     </div>
   )
 }

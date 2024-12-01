@@ -1,4 +1,4 @@
-import React from 'react'
+import { React, useState } from 'react'
 import Slider from './Slider'
 import HeatmapButton from './HeatmapButton'
 
@@ -11,17 +11,26 @@ import HeatmapButton from './HeatmapButton'
  * @param {function} setHeatmap A function to toggle the heatmap display in the parent component.
  */
 const Header = ({ year, setYear, heatmap, setHeatmap }) => {
+  const [hover, setHover] = useState(false)
 
   return (
     <header className='header'>
-      <h1>DebtMap</h1>
+      <div id="header-top-row">
+        <h1 onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)}>DebtMap</h1>
+        <HeatmapButton
+          heatmap={heatmap}
+          setHeatmap={setHeatmap}
+        />
+      </div>
+      <p onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)} className={hover ? 'show-header-desc' : 'hide-header-desc'} >
+        Explore and visualize global economic data including Gross General Debt, Central Government Debt, Population
+        and GDP. Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
+        IMF Open Data API
+        </a>.
+      </p>
       <Slider
         year={year}
         setYear={setYear}
-      />
-      <HeatmapButton
-        heatmap={heatmap}
-        setHeatmap={setHeatmap}
       />
     </header>
   )

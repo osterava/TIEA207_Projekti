@@ -3,6 +3,7 @@ import MapComponent from './components/MapComponent.js'
 import Footer from './components/footer.js'
 import Header from './components/header.js'
 import './App.css'
+import Search from './components/search.js'
 
 /**
  * The main App component that serves as the entry point of the application.
@@ -13,7 +14,7 @@ import './App.css'
  */
 const App = () => {
   const [year, setYear] = useState(2024)
-  const [heatmap, setHeatmap] = useState(false)
+  const [heatmap, setHeatmap] = useState(true) // True = GG debt, False = CG debt
 
   return (
     <div className='app'>
@@ -22,7 +23,10 @@ const App = () => {
         setYear={setYear}
         heatmap={heatmap}
         setHeatmap={setHeatmap}
-      />
+      />{/*
+        <Search
+          year={year}
+      />*/}
       <MapComponent
         year={year}
         heatmap={heatmap}

@@ -1,111 +1,341 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  margin-top: 0;
+  padding-top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: darkseagreen;
+}
+
+/* Default Design */
 .app {
+  /* To make all elements center */
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1% 5%;
+  font-size: 30px;
+  color: black;
+}
+
+/* Header Design */
+.header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 0;
-  background-color: #FFFFFF;
-  /*Muistilista: beige */
-  /* #222222 #FFFFFF #7D84B2 #BF4342 #F7934C */
 }
 
-.header {
-  width: 100vw;
-  background-color: #F7F6F3;
-  text-align: center;
-  margin-bottom: 5vh;
-}
-
-.midwrapper {
+#header-top-row {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#header-top-row h1 {
+  font-size: 45px;
+  color: black;
+  margin: 0 10px 0 0;
+}
+
+#header-top-row button {
+  font-size: 20px;
+  color: black;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 0 0 0 10px;
+  max-width: 50%;
+}
+
+.header p {
+  font-size: 15px;
+}
+
+.show-header-desc {
+  width: 100%;
+  height: auto;
+  opacity: 1;
+  overflow-y: hidden;
+  transition: height 0.5s ease, opacity 0.5s ease;
+}
+
+.hide-header-desc {
+  width: 100%;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 0.5s ease, opacity 0.5s ease;
+}
+
+/* Slider Design */
+
+#sliderWrapper {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
   justify-content: center;
-  width: 100vw;
-  max-width: 100vw;
-  max-height: 55vh;
+  align-items: center;
 }
 
-.footer {
-  background-color: #F7F6F3;
-  color: #2A2B2A; 
-  text-align: center;
-  padding-bottom: 2vh;
-  padding-top: 2vh;
-  margin-top: 5vh;
-  position: relative;
-  bottom: 0;
-  width: 100vw;
+#sliderWrapper span {
+  margin: 5px;
+  font-size: 25px;
+  color: black;
 }
 
-.licences {
-  width: 40px; 
-  height: 40px; 
-  padding-right: 5px;
-}
-
-h1 {
-  text-align: left;
-  padding-left: 5vw;
-  font-family: Georgia, serif;  
-  font-size: 3vh;
-  color: #2A2B2A;
-  font-weight: 500;
-}
-
-#info-box {
-  max-width: 30vw;
-  max-height: 55vh;
-  background: #FFFFFF;
-  color: #2A2B2A;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-  z-index: 1000;
-  padding: 2%;
-  overflow-y: auto;
-  margin-left: 5vw;
-  animation-name: entry;
-  animation-duration: 0.2s;
-  animation-iteration-count: 1;
-  font-size: smaller;
-}
-
-
-@keyframes entry {
-  from {
-    max-width: 0vw;
-  } to {
-    max-width: 30vw;
-  }
-}
-
-.map-buttons {
-  margin-top: 10px;
-}
-
-#map { 
-  min-height: 55vh;
-  border: 2px solid;
-  border-color: #2A2B2A;
-  align-self: center;
-  margin-right: 5vw;
-  margin-left: 5vw;
+#sliderInnerWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 #slider {
-  width: 80vw;
-  margin-left: 10vw;
-  margin-right: 1vw;
-  margin-bottom: 1vh;
+  width: 50%;
 }
 
-.header > button {
-  padding-top: 5px;
-  padding-bottom: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  margin-bottom: 20px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-weight: 700;
-  transition: 0.3s ease-in-out;
-  border-radius: 7px;
+#yearButtons {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#yearButtons button {
+  font-size: 20px;
+  color: black;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+
+/* InfoBox */
+
+#info-box {
+  background: tan;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid black;
+  padding: 5px;
+  margin: 5px 0;
+  position: relative;
+  opacity: 1;
+  height: auto;
+  max-height: 70%;
+  transition: height 0.5s ease, opacity 0.5s ease;
+  overflow-y: auto;
+}
+
+#info-box.hidden {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  transition: none;
+}
+
+#info-box p {
+  font-size: 20px;
+  color: black;
+}
+
+#info-box h2 {
+  font-size: 30px;
+  color: black;
+}
+
+#info-box button {
+  height: 30px;
+  min-width: 40px;
+  background: tomato;
+  border: none;
+  border-radius: 5px;
+  margin: 10px 0 0 0;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* DebtChart */
+
+#debtChart {
+  min-height: 250px;
+}
+
+/*Map Component*/
+
+#mapContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  height: 100%;
+  margin: 5px 0 0;
+}
+
+/*Map*/
+
+#map {
+  flex: 1;
+  width: 100%;
+  min-height: 30%;
+  height: 100%;
+  border: 3px solid black;
+  position: relative;
+}
+
+/* Search */
+
+.search {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.searchWrapper {
+  position: relative;
+}
+
+.search input {
+  background-color: white;
+  border-radius: 10px;
+  height: 2.5rem;
+  padding: 0 15px;
+  align-items: center;
+  border: none;
+  box-shadow: 0px 0px 8px;
+  margin-left: 15px;
+  width: auto;
+}
+
+input:focus {
+  outline: none;
+}
+
+.search_suggestion_line {
+  display: block;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.search_suggestion_line:hover {
+  background-color: #bec2c5;
+}
+
+.search_result {
+  position: absolute;
+  z-index: 1000;
+  background-color: #fff;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 90%;
+  right: 0;
+  border-radius: 10px;
+}
+
+#clear-icon {
+  position: absolute;
+  cursor: pointer;
+  font-size: 16px;
+  top: 10px;
+  right: 5px;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 1.2rem;
+  color: #888;
+}
+
+/* Footer Design */
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap:0.2em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.names_header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0;
+}
+
+.names_header p {
+  font-size: 14px;
+  color: black;
+}
+
+.license_tab {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.licenses {
+  width: 20px;
+  height: 20px;
+}
+
+.tooltip {
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  width: auto;
+  white-space: nowrap;
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 9999; 
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+.labelstyle {
+  background-color: white;
+  color: black;
+  border: 2px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  text-align: center;
 }
 
 /* Toggle button styling */
@@ -119,24 +349,75 @@ h1 {
   color: #F7F6F3;
 }
 
-.toggleoff:active {
-  background-color: #20001d;
-  color: #F7F6F3;
+/* For Desktop View */
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+  #mapContainer {
+    flex-direction: row-reverse;
+  }
+
+  #info-box {
+    transition: width 0.2s ease, opacity 0.2s ease;
+    max-height: 100%;
+    height: 100%;
+    width: 30%;
+    max-width: 70%;
+    margin: 0;
+    padding: 10px;
+  }
+
+
+  #debtChart {
+    flex: 1;
+    width: 100%;
+  }
+
+  #sliderInnerWrapper {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #slider {
+    width: 50%;
+  }
+
+  #yearButtons {
+    width: 50%;
+  }
+
+  #yearButtons button {
+    width: 100px;
+  }
+
+  .show-header-desc {
+    width: 100%;
+    height: auto;
+    opacity: 1;
+    overflow-y: hidden;
+    transition: height 0.5s ease, opacity 0.5s ease;
+  }
+
+  .hide-header-desc {
+    width: 100%;
+    height: auto;
+    opacity: 1;
+    overflow-y: hidden;
+    transition: height 0.5s ease, opacity 0.5s ease;
+  }
 }
 
-.toggleon {
-  background-color: #d62839;
-  color: #F7F6F3;
+/* For Tablet View */
+@media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+
 }
 
-.toggleon:hover {
-  background-color: #ec3a4c;
-  color: #F7F6F3;
+/* For Mobile Portrait View min-width=320px */
+@media screen and (max-device-width: 480px) and (orientation: portrait) {
+
 }
 
-.toggleon:active {
-  background-color: #a80d1c;;
-  color: #F7F6F3;
+/* For Mobile Landscape View */
+@media screen and (max-device-width: 640px) and (orientation: landscape) {
+
 }
 
 /* Leaflet legend styling */
