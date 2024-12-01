@@ -297,6 +297,12 @@ const MapComponent = ({ year, heatmap }) => {
     setSelectedCountryCode(null)
   }
 
+  const handleCountrySelect = (country, countryCode) => {
+    setSelectedCountry(country)
+    setSelectedCountryCode(countryCode)
+    setInfoVisible(true)
+  }
+
   const handleMouseEnter = () => {
     mapRef.current.scrollWheelZoom.disable()
   }
@@ -318,7 +324,7 @@ const MapComponent = ({ year, heatmap }) => {
   return (
     <div id='mapContainer'>
       <div id="map">
-        <Search year={year} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}/>
+        <Search onCountrySelect={handleCountrySelect} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
       </div>
       <InfoBox
         selectedCountry={selectedCountry}
