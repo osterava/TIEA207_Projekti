@@ -132,6 +132,10 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
     return
   }
 
+  if (feature.properties.name) {
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'auto', className:'labelstyle', sticky: true  })
+  }
+
   var debt = debtData[feature.properties.gu_a3]
 
   if (ggDebtData) {
