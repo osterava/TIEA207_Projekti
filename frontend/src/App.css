@@ -338,6 +338,17 @@ input:focus {
   text-align: center;
 }
 
+/* Toggle button styling */
+.toggleoff {
+  background-color: #370031;
+  color: #F7F6F3;
+}
+
+.toggleoff:hover {
+  background-color: #d62839;
+  color: #F7F6F3;
+}
+
 /* For Desktop View */
 @media screen and (min-width: 1024px) and (orientation: landscape) {
   #mapContainer {
@@ -407,4 +418,31 @@ input:focus {
 /* For Mobile Landscape View */
 @media screen and (max-device-width: 640px) and (orientation: landscape) {
 
+}
+
+/* Leaflet legend styling */
+.info {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  color:#2A2B2A;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+  width: 6vw;
+}
+.info h4 {
+  margin: 0 0 5px;
+  color: #2A2B2A;
+}
+
+.legend {
+  line-height: 18px;
+  color: #555;
+}
+.legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
 }
