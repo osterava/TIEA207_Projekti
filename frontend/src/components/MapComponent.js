@@ -324,7 +324,7 @@ const MapComponent = ({ year, heatmap }) => {
   return (
     <div id='mapContainer'>
       <div id="map">
-        <Search year={year} onCountrySelect={handleCountrySelect} />
+        <Search onCountrySelect={handleCountrySelect} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
       </div>
       <InfoBox
         selectedCountry={selectedCountry}
