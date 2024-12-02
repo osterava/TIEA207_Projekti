@@ -276,11 +276,15 @@ const MapComponent = ({ year, heatmap }) => {
       const legend = L.control({ position: 'bottomright' })
 
       if (mapElement) {
-        const map = L.map(mapElement).setView([40, 5], 2)
+        const map = L.map(mapElement).setView([40, 5], 3)
 
-        // Jostain syystä hajoittaa koodin: 'el is undefined'
-        //map.setMinZoom(3)
-        //map.setMaxZoom(7)
+        try {
+          map.setMaxZoom(4)
+          map.setMinZoom(2)
+          map.setMaxBounds(bounds)
+        } catch (err) {
+          console.error('Error setting zoom levels:', err)
+        }
 
         mapRef.current = map
 
