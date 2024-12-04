@@ -32,6 +32,8 @@ Tervetuloa TIEA207 Projektikurssin repositoryyn!
 ----------------------------------------------------------------------------------------------------------------------
 
 ## Deployattu versio
+- Sovellus käynnistyy URL:n painettua, hetki menee sen latautuessa. 
 - Deployattu versio on: [Linkki Sovellukseen](https://tiea207-projekti-2024.onrender.com/)
+  
 
 ----------------------------------------------------------------------------------------------------------------------
