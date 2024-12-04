@@ -143,7 +143,7 @@ function highlightFeatureHeatmap(e) {
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData, setZoom, setCenter) {
   if (!debtData || !feature || !feature.properties ) {
     console.error('Missing debt data or feature properties')
     return
@@ -177,7 +177,12 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
-
+      try {
+        setZoom(mapRef.current.getZoom())
+        setCenter(mapRef.current.getCenter())
+      } catch (error) {
+        console.error('Error getting map center and zoom:', error)
+      }
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
@@ -204,6 +209,8 @@ const MapComponent = ({ year, heatmap }) => {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [center, setCenter] = useState([40, 5])
+  const [zoom, setZoom] = useState(3)
 
   const mapRef = useRef(null)
 
@@ -276,15 +283,23 @@ const MapComponent = ({ year, heatmap }) => {
       const legend = L.control({ position: 'bottomright' })
 
       if (mapElement) {
-        const map = L.map(mapElement).setView([40, 5], 3)
+        const map = L.map(mapElement).setView(center, zoom)
 
         try {
-          map.setMaxZoom(4)
-          map.setMinZoom(2)
+          map.setMaxZoom(6)
+          map.setMinZoom(3)
           map.setMaxBounds(bounds)
         } catch (err) {
           console.error('Error setting zoom levels:', err)
         }
+
+        map.on('zoomend', () => {
+          setZoom(map.getZoom())
+        })
+
+        map.on('moveend', () => {
+          setCenter(map.getCenter())
+        })
 
         mapRef.current = map
 
@@ -306,14 +321,14 @@ const MapComponent = ({ year, heatmap }) => {
         ggDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, true),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true)
+            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true, setZoom, setCenter)
         }).addTo(map)
 
         // Add GeoJSON layer with event handling
         cgDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, false),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false)
+            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false, setZoom, setCenter)
         }).addTo(map)
       }
     }
@@ -330,9 +345,15 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, center, zoom])
 
   const closeInfoBox = () => {
+    try {
+      setZoom(mapRef.current.getZoom())
+      setCenter(mapRef.current.getCenter())
+    } catch (error) {
+      console.error('Error getting map center and zoom:', error)
+    }
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
