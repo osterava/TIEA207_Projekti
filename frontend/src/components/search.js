@@ -1,44 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
-import InfoBox from './infoBox'
 import countriesData from '../data/countries.json'
-import populationService from '../services/popService.js'
-import gdpService from '../services/gdpService.js'
 
-const Search = ({ year, onMouseEnter, onMouseLeave }) => {
+const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
   const [search, setSearch] = useState('')
   const [searchData, setSearchData] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [selectedCountry, setSelectedCountry] = useState(null)
-  const [populationData, setPopulationData] = useState(null)
-  const [gdpData, setGdpData] = useState(null)
   const searchRef = useRef(null)
-
-  // Fetch data for the selected country
-  const fetchCountryData = async (countryCode) => {
-    try {
-      const populationResponse = await populationService.getDataByYear(year, countryCode)
-      const population = populationResponse.LP ? populationResponse.LP[countryCode] : 'No data available'
-      setPopulationData(population)
-    } catch (error) {
-      console.error('Error fetching population data:', error)
-      setPopulationData('Error fetching population data')
-    }
-
-    try {
-      const gdpResponse = await gdpService.getGDPByYear(year, countryCode)
-      const gdp = gdpResponse.NGDPD ? gdpResponse.NGDPD[countryCode] : 'No data available'
-      setGdpData(gdp)
-    } catch (error) {
-      console.error('Error fetching GDP data:', error)
-      setGdpData('Error fetching GDP data')
-    }
-  }
-
-  const handleChange = (e) => {
-    setSearch(e.target.value)
-    setShowSuggestions(e.target.value !== '')
-  }
 
   const handleClear = () => {
     setSearch('')
@@ -52,16 +20,10 @@ const Search = ({ year, onMouseEnter, onMouseLeave }) => {
   }
 
   const handleSuggestionClick = (country) => {
-    setSelectedCountry(country.properties)
-    fetchCountryData(country.properties.gu_a3)
+    const countryCode = country.properties.gu_a3
+    onCountrySelect(country.properties, countryCode)
     setSearch('')
     setShowSuggestions(false)
-  }
-
-  const closeInfoBox = () => {
-    setSelectedCountry(null)
-    setPopulationData(null)
-    setGdpData(null)
   }
 
   useEffect(() => {
@@ -83,16 +45,26 @@ const Search = ({ year, onMouseEnter, onMouseLeave }) => {
   }, [search])
 
   return (
-    <div className="search" ref={searchRef} onMouseEnter={onMouseEnter}  onMouseLeave={onMouseLeave}>
-      <div className='searchWrapper'>
-        <FaSearch id="search-icon" />
-        <input
-          placeholder="Type to search..."
-          onChange={handleChange}
-          value={search}
-          onFocus={() => setShowSuggestions(true)}
-        />
-        {search && <FaTimes id="clear-icon" onClick={handleClear} />}
+    <div className="search" ref={searchRef} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <div className="searchWrapper">
+        <div className="inputWrapper">
+          <FaSearch className="searchIcon" />
+          <input
+            placeholder="Search a country..."
+            onChange={(e) => setSearch(e.target.value)}
+            value={search}
+            onFocus={() => setShowSuggestions(true)}
+          />
+          {search && (
+            <button
+              className="clearButton"
+              onClick={handleClear}
+              aria-label="Clear search"
+            >
+              <FaTimes />
+            </button>
+          )}
+        </div>
         {showSuggestions && searchData.length > 0 && (
           <div className="search_result">
             {searchData.map((country, index) => (
@@ -105,16 +77,6 @@ const Search = ({ year, onMouseEnter, onMouseLeave }) => {
               </button>
             ))}
           </div>
-        )}
-        {selectedCountry && (
-          <InfoBox
-            selectedCountry={selectedCountry}
-            populationData={populationData}
-            selectedCountryGBDYear={gdpData}
-            selectedCountryCode={selectedCountry.gu_a3}
-            closeInfoBox={closeInfoBox}
-            year={year}
-          />
         )}
       </div>
     </div>

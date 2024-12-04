@@ -98,6 +98,23 @@ const applyHeatmapStyle = (feature, year, isGGDebt) => {
 }
 
 /**
+ * Get color codes depending on the d value
+ * @param {*} d
+ * @returns color code as string
+ */
+function getColor(d) {
+  return d > 100 ? '#ff0d0d' :
+    d > 85  ? '#ff4e11' :
+      d > 70  ? '#ff8e15' :
+        d > 55  ? '#fab733' :
+          d > 40   ? '#acb334' :
+            d > 25   ? '#69b34c' :
+              d > 10   ? '#3baf4a' :
+                d > 0    ? 'green':
+                  'black'
+}
+
+/**
  * Highlight function to style the selected country
  * @param {*} e
  */
@@ -126,20 +143,17 @@ function highlightFeatureHeatmap(e) {
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
-function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData) {
+function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData, setZoom, setCenter) {
   if (!debtData || !feature || !feature.properties ) {
     console.error('Missing debt data or feature properties')
     return
   }
 
-  var debt = debtData[feature.properties.gu_a3]
-  if (ggDebtData) {
-    for (var year in ggDebtData[feature.properties.gu_a3]) {
-      if (debt[year] === undefined) {
-        debt[year] = ggDebtData[feature.properties.gu_a3][year]
-      }
-    }
+  if (feature.properties.name) {
+    layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'auto', className:'labelstyle', sticky: true  })
   }
+
+  var debt = debtData[feature.properties.gu_a3]
 
   if (ggDebtData) {
     if (debt) {
@@ -163,7 +177,12 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
-
+      try {
+        setZoom(mapRef.current.getZoom())
+        setCenter(mapRef.current.getCenter())
+      } catch (error) {
+        console.error('Error getting map center and zoom:', error)
+      }
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
@@ -183,7 +202,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
  */
 const MapComponent = ({ year, heatmap }) => {
   const [publicDebtData, setPublicDebtData] = useState(null)
-  const [ggDebtData, setGGDebtData] = useState(null)
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
   const [centralGovernmentDebtData, setCentralGovernmentDebtData] = useState(null)
@@ -191,6 +209,8 @@ const MapComponent = ({ year, heatmap }) => {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [center, setCenter] = useState([40, 5])
+  const [zoom, setZoom] = useState(3)
 
   const mapRef = useRef(null)
 
@@ -198,11 +218,23 @@ const MapComponent = ({ year, heatmap }) => {
    * Fetch all data that is needed to run the application
    */
   useEffect(() => {
+    // If data is already loaded, skip fetching
     if (!loading) return
     const fetchData = async () => {
       try {
-        const pdData = await getPublicDebtData()
-        var data = pdData.values.GGXWDG_NGDP
+
+        const ggDebtData1 = await getPublicDebtData()
+        var data = ggDebtData1.values.GGXWDG_NGDP
+        console.log(data)
+
+        const ggDebtData2 = await getGGDebtData()
+        for (var countryCode in data) {
+          for (var year in ggDebtData2.values[countryCode]) {
+            if (data[countryCode][year] === undefined) {
+              data[countryCode][year] = ggDebtData2.values[countryCode][year]
+            }
+          }
+        }
         setPublicDebtData(data)
         console.log('Debt data:', data)
 
@@ -220,11 +252,6 @@ const MapComponent = ({ year, heatmap }) => {
         data = cgDebtData.values.CG_DEBT_GDP
         setCentralGovernmentDebtData(data)
         console.log('Central government debt data:', data)
-
-        const ggDebtData = await getGGDebtData()
-        data = ggDebtData.values.GG_DEBT_GDP
-        setGGDebtData(data)
-        console.log('General government debt data (2):', data)
 
         setLoading(false)
       } catch (err) {
@@ -250,29 +277,58 @@ const MapComponent = ({ year, heatmap }) => {
 
     if (mapRef.current === null) {
       const mapElement = document.getElementById('map')
+      const southWest = L.latLng(-89.98155760646617, -200)
+      const northEast = L.latLng(89.99346179538875, 200)
+      const bounds = L.latLngBounds(southWest, northEast)
+      const legend = L.control({ position: 'bottomright' })
 
       if (mapElement) {
-        const map = L.map(mapElement).setView([40, 5], 2)
+        const map = L.map(mapElement).setView(center, zoom)
 
-        // Jostain syystä hajoittaa koodin: 'el is undefined'
-        //map.setMinZoom(3)
-        //map.setMaxZoom(7)
+        try {
+          map.setMaxZoom(6)
+          map.setMinZoom(3)
+          map.setMaxBounds(bounds)
+        } catch (err) {
+          console.error('Error setting zoom levels:', err)
+        }
+
+        map.on('zoomend', () => {
+          setZoom(map.getZoom())
+        })
+
+        map.on('moveend', () => {
+          setCenter(map.getCenter())
+        })
 
         mapRef.current = map
 
-        // Add GeoJSON layer with heatmap style
+        // Create and add legend to the map using leaflet's DomUtil
+        legend.onAdd = () => {
+          let div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 10, 25, 40, 55, 70, 85, 100]
+          div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data<br />'
+          // Get colors for the intervals
+          for (let i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
+          }
+          return div
+        }
+        legend.addTo(map)
 
         ggDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, true),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, ggDebtData)
+            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true, setZoom, setCenter)
         }).addTo(map)
 
         // Add GeoJSON layer with event handling
         cgDebtHeatmapLayer = L.geoJson(countries, {
           style: (feature) => applyHeatmapStyle(feature, year, false),
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, null)
+            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false, setZoom, setCenter)
         }).addTo(map)
       }
     }
@@ -289,12 +345,24 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, center, zoom])
 
   const closeInfoBox = () => {
+    try {
+      setZoom(mapRef.current.getZoom())
+      setCenter(mapRef.current.getCenter())
+    } catch (error) {
+      console.error('Error getting map center and zoom:', error)
+    }
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
+  }
+
+  const handleCountrySelect = (country, countryCode) => {
+    setSelectedCountry(country)
+    setSelectedCountryCode(countryCode)
+    setInfoVisible(true)
   }
 
   const handleMouseEnter = () => {
@@ -318,7 +386,7 @@ const MapComponent = ({ year, heatmap }) => {
   return (
     <div id='mapContainer'>
       <div id="map">
-        <Search year={year} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}/>
+        <Search onCountrySelect={handleCountrySelect} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
       </div>
       <InfoBox
         selectedCountry={selectedCountry}
