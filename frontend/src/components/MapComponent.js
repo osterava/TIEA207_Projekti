@@ -229,9 +229,9 @@ const MapComponent = ({ year, heatmap }) => {
 
         const ggDebtData2 = await getGGDebtData()
         for (var countryCode in data) {
-          for (var year in ggDebtData2.values[countryCode]) {
+          for (var year in ggDebtData2.values.GG_DEBT_GDP[countryCode]) {
             if (data[countryCode][year] === undefined) {
-              data[countryCode][year] = ggDebtData2.values[countryCode][year]
+              data[countryCode][year] = ggDebtData2.values.GG_DEBT_GDP[countryCode][year]
             }
           }
         }
@@ -283,11 +283,14 @@ const MapComponent = ({ year, heatmap }) => {
       const legend = L.control({ position: 'bottomright' })
 
       if (mapElement) {
-        const map = L.map(mapElement).setView(center, zoom)
+        const map = L.map(mapElement, { attributionControl:false }).setView(center, zoom)
+        L.control.attribution({
+          position: 'bottomleft',
+        }).addTo(map)
 
         try {
           map.setMaxZoom(6)
-          map.setMinZoom(3)
+          map.setMinZoom(2)
           map.setMaxBounds(bounds)
         } catch (err) {
           console.error('Error setting zoom levels:', err)
@@ -298,7 +301,11 @@ const MapComponent = ({ year, heatmap }) => {
         })
 
         map.on('moveend', () => {
-          setCenter(map.getCenter())
+          try {
+            setCenter(map.getCenter())
+          } catch (error) {
+            console.error('Error getting map center and zoom:', error)
+          }
         })
 
         mapRef.current = map

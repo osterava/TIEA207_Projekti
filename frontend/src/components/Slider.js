@@ -1,10 +1,11 @@
+import HeatmapButton from './HeatmapButton'
 /**
  * A slider component that allows users to select a year within a given range.
  * The selected year is passed to the parent component via the `setYear` function.
  * @param {number} year The currently selected year, displayed alongside the slider.
  * @param {function} setYear A function to update the year in the parent component's state.
  */
-const Slider = ({ year, setYear }) => {
+const Slider = ({ year, setYear, heatmap, setHeatmap }) => {
 
   /**
   * Handles the change event of the slider, updating the parent component with the selected year.
@@ -41,10 +42,17 @@ const Slider = ({ year, setYear }) => {
         />
         <span>{max}</span>
       </div>
-      <div id="yearButtons">
-        <button onClick={decrementYear}>-</button>
-        <span style={{ margin: '0 1vw' }}>{year}</span>
-        <button onClick={incrementYear}>+</button>
+      <div id="buttonWrapper">
+        <p className='current_debt'>{heatmap ? 'General government debt' : 'Central government debt'}</p>
+        <div id="yearButtons">
+          <button onClick={decrementYear}>-</button>
+          <span style={{ margin: '0 1vw' }}>{year}</span>
+          <button onClick={incrementYear}>+</button>
+        </div>
+        <HeatmapButton
+          heatmap={heatmap}
+          setHeatmap={setHeatmap}
+        />
       </div>
     </div>
   )

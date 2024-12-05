@@ -5,12 +5,10 @@
 }
 
 body, html, #root {
-  margin-top: 0;
-  padding-top: 0;
   height: 100%;
   width: 100%;
-  background-color: darkseagreen;
-  --infobox-height: 70%; /* to use with infobox and mapcontainer*/
+  overflow: hidden;
+  background-color: #8fbc8f;
 }
 
 /* Default Design */
@@ -28,6 +26,7 @@ body, html, #root {
 
 /* Header Design */
 .header {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -36,6 +35,7 @@ body, html, #root {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 }
 
 #header-top-row h1 {
@@ -60,7 +60,7 @@ body, html, #root {
 }
 
 .header p {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .show-header-desc {
@@ -106,20 +106,42 @@ body, html, #root {
   width: 50%;
 }
 
+#buttonWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current_debt {
+  background-color: #8aff8a;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid black;
+  height: fit-content;
+}
+
 #yearButtons {
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
 }
 
 #yearButtons button {
+  width: 100px;
+  height: 50px;
+}
+
+#buttonWrapper button {
   font-size: 20px;
   color: black;
   background-color: white;
   border: none;
   border-radius: 5px;
-  padding: 5px 10px;
+  padding: 10px;
 }
 
 #yearButtons button:hover {
@@ -138,7 +160,6 @@ body, html, #root {
   position: relative;
   opacity: 1;
   height: auto;
-  max-height: var(--infobox-height);
   transition: height 0.5s ease, opacity 0.5s ease;
   overflow-y: auto;
 }
@@ -147,6 +168,8 @@ body, html, #root {
   height: 0;
   width: 0;
   opacity: 0;
+  padding: 0;
+  margin: 0;
   transition: none;
 }
 
@@ -192,7 +215,7 @@ body, html, #root {
   width: 100%;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
-  max-height: var(--infobox-height);
+  position: relative;
 }
 
 /*Map*/
@@ -212,7 +235,7 @@ body, html, #root {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1000;
+  z-index: 1001;
 }
 
 .searchWrapper {
@@ -342,6 +365,10 @@ input:focus {
   opacity: 1;
 }
 
+.leaflet-right .leaflet-control{
+  margin: 0 !important;
+}
+
 *,
 *:focus,
 *:hover {
@@ -376,7 +403,7 @@ input:focus {
   }
 
   #info-box {
-    transition: width 0.2s ease, opacity 0.2s ease;
+    transition: width 0.5s ease, opacity 0.5s ease;
     max-height: 100%;
     height: 100%;
     width: 30%;
@@ -384,6 +411,10 @@ input:focus {
     margin: 0;
     padding: 10px;
     border-right: 0px;
+  }
+
+  #info-box h2 {
+    width: 80%;
   }
 
   #debtChart {
@@ -406,6 +437,10 @@ input:focus {
 
   #yearButtons button {
     width: 100px;
+  }
+
+  #map {
+    transition: width 0.5s ease !important;
   }
 
   .show-header-desc {
@@ -432,7 +467,62 @@ input:focus {
 
 /* For Mobile Portrait View min-width=320px */
 @media screen and (max-device-width: 480px) and (orientation: portrait) {
-
+  .info {
+    font-size:  10px !important;
+  }
+  .info h4 {
+    font-size: 10px !important;
+  }
+  p {
+    font-size: 12px !important;
+  }
+  h1 {
+    font-size: 2rem !important;
+  }
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  h3 {
+    font-size: 1.25rem !important;
+  }
+  span {
+    font-size: 1.25rem !important;
+  }
+  button {
+    font-size: 1rem !important;
+    font-weight: bold;
+    text-align: center;
+  }
+  #buttonWrapper button {
+    font-size: 12px !important;
+  }
+  #buttonWrapper p {
+    text-wrap: wrap !important;
+  }
+  #info-box {
+    max-height: 50% !important;
+  }
+  #info-box button {
+    font-size: 12px !important;
+  }
+  .names_header p {
+    font-size: 10px !important;
+  }
+  #yearButtons button {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  #mapContainer {
+    margin: 15px 0 0 !important;
+  }
+  .tooltip:hover::after {
+    width: 100% !important;
+    text-wrap: wrap !important;
+  }
+  .tooltip::after {
+    width: 100% !important;
+    text-wrap: wrap !important;
+  }
 }
 
 /* For Mobile Landscape View */
@@ -448,7 +538,7 @@ input:focus {
   background: rgba(255,255,255,0.8);
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
   border-radius: 5px;
-  width: 6vw;
+  width: fit-content;
 }
 .info h4 {
   margin: 0 0 5px;

@@ -1,6 +1,5 @@
 import { React, useState } from 'react'
 import Slider from './Slider'
-import HeatmapButton from './HeatmapButton'
 
 /**
  * The Header component contains the title, a year slider, and a button to toggle the heatmap display.
@@ -17,20 +16,18 @@ const Header = ({ year, setYear, heatmap, setHeatmap }) => {
     <header className='header'>
       <div id="header-top-row">
         <h1 onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)}>DebtMap</h1>
-        <HeatmapButton
-          heatmap={heatmap}
-          setHeatmap={setHeatmap}
-        />
+        <p onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)} className={hover ? 'show-header-desc' : 'hide-header-desc'} >
+          Explore and visualize global economic data including Gross General Debt (GG), Central Government Debt (CG), Population
+          and GDP. Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
+          IMF Open Data API
+          </a>.
+        </p>
       </div>
-      <p onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)} className={hover ? 'show-header-desc' : 'hide-header-desc'} >
-        Explore and visualize global economic data including Gross General Debt, Central Government Debt, Population
-        and GDP. Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
-        IMF Open Data API
-        </a>.
-      </p>
       <Slider
         year={year}
         setYear={setYear}
+        heatmap={heatmap}
+        setHeatmap={setHeatmap}
       />
     </header>
   )
