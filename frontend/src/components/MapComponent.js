@@ -113,6 +113,18 @@ function highlightFeatureHeatmap(e) {
   layer.bringToFront()
 }
 
+function highlightSelectedFeature(e) {
+  var layer = e.target
+  layer.setStyle({
+    weight: 5,
+    fillColor: '#fff',
+    color: 'black',
+    fillOpacity: 0.6,
+  })
+
+  layer.bringToFront()
+}
+
 /**
  * Handle feature (country) click event for heatmap layer.
  * Sets the selected country, fetches population and GDP data, and adjusts the map view.
@@ -126,6 +138,7 @@ function highlightFeatureHeatmap(e) {
  * @param {number} year The selected year to fetch data for.
  * @param {*} mapRef Reference to the map object.
  */
+let selectedLayer = null
 function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, debtData, mapRef, resetHighlight, ggDebtData) {
   if (!debtData || !feature || !feature.properties ) {
     console.error('Missing debt data or feature properties')
@@ -158,6 +171,21 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
   layer.on({
     click: () => {
+      if (selectedLayer) {
+        resetHighlight({ target: selectedLayer })
+      }
+
+      if (selectedLayer === layer) {
+        selectedLayer = null
+        setSelectedCountry(null)
+        setInfoVisible(false)
+        setSelectedCountryCode(null)
+        return
+      }
+
+      highlightSelectedFeature({ target: layer })
+      selectedLayer = layer
+
       setSelectedCountry(null)
       setSelectedCountryCode(null)
 
@@ -166,11 +194,13 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
-
-      highlightFeatureHeatmap({ target: layer })
     },
     mouseover: highlightFeatureHeatmap,
-    mouseout: resetHighlight,
+    mouseout: (e) => {
+      if (selectedLayer !== e.target) {
+        resetHighlight(e)
+      }
+    },
   })
 }
 
@@ -277,6 +307,18 @@ const MapComponent = ({ year, heatmap }) => {
       }
     }
 
+    if (selectedCountryCode && !loading) {
+      const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+      const layer = layers.find(
+        (l) => l.feature.properties && l.feature.properties.gu_a3 === selectedCountryCode
+      )
+
+      if (layer) {
+        highlightSelectedFeature({ target: layer })
+        selectedLayer = layer
+      }
+    }
+
     if (heatmap) {
       ggDebtHeatmapLayer.bringToFront()
     } else {
@@ -289,15 +331,42 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, ggDebtData, selectedCountryCode])
 
   const closeInfoBox = () => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
+
+    if (selectedLayer) {
+      if (heatmap) {
+        ggDebtHeatmapLayer.resetStyle(selectedLayer)
+      } else {
+        cgDebtHeatmapLayer.resetStyle(selectedLayer)
+      }
+      selectedLayer = null
+    }
   }
 
   const handleCountrySelect = (country, countryCode) => {
+    if (selectedLayer) {
+      if (heatmap) {
+        ggDebtHeatmapLayer.resetStyle(selectedLayer)
+      } else {
+        cgDebtHeatmapLayer.resetStyle(selectedLayer)
+      }
+    }
+
+    const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+    const layer = layers.find(
+      (l) => l.feature.properties && l.feature.properties.gu_a3 === countryCode
+    )
+
+    if (layer) {
+      highlightSelectedFeature({ target: layer })
+      selectedLayer = layer
+    }
+
     setSelectedCountry(country)
     setSelectedCountryCode(countryCode)
     setInfoVisible(true)
