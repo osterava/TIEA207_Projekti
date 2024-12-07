@@ -16,7 +16,7 @@ const Slider = ({ year, setYear, heatmap, setHeatmap }) => {
   }
 
   const min = 1990
-  const max = 2025
+  const max = 2029
 
   const incrementYear = () => {
     if (year < max) setYear(year + 1)

@@ -200,6 +200,14 @@ body, html, #root {
   background-color: #d1442b;
 }
 
+ul {
+  list-style-type: none;
+}
+
+li {
+  font-size: 18px;
+}
+
 /* DebtChart */
 
 #debtChart {
@@ -423,6 +431,7 @@ input:focus {
   #debtChart {
     flex: 1;
     width: 100%;
+    min-height: 400px;
   }
 
   #sliderInnerWrapper {

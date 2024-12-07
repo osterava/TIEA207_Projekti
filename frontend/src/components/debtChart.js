@@ -27,9 +27,11 @@ const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
   const totalDebtData = centralGovDebt[countryCode]
   const debtData = publicDebt[countryCode]
 
-  const labels = debtData && Object.keys(debtData)
-
   if (!debtData && !totalDebtData) return <p> No debt data available for this country </p>
+
+  var labels
+  if (!debtData) labels = totalDebtData && Object.keys(totalDebtData)
+  else labels = debtData && Object.keys(debtData)
 
   const filteredTotalDebtData = totalDebtData ? labels.map(year => totalDebtData[year] || null) : []
 
@@ -80,10 +82,6 @@ const DebtChart = ({ countryCode, centralGovDebt, publicDebt }) => {
         position: 'top',
       },
     },
-  }
-
-  if ((!debtData && !totalDebtData) || Object.keys(debtData).length === 0) {
-    return <p>No debt data available for this country.</p>
   }
 
   return (

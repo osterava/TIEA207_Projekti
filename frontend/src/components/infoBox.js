@@ -32,22 +32,24 @@ const InfoBox = ({ selectedCountry, populationData, selectedCountryGBDYear, sele
           <h2>{selectedCountry ? selectedCountry.name : ''} in {year}</h2>
           <button onClick={closeInfoBox}>Close</button>
         </div>
-        <p><strong> Country ID: </strong>{selectedCountryCode}</p>
+        <p><strong> Country code: </strong>{selectedCountryCode}</p>
         <p><strong> Population: </strong>{formatted_pop}</p>
         <p><strong> GDP: </strong>{formatted_gdp}</p>
-        <p><strong> General Government Debt: </strong>{formatted_ggDebt}</p>
-        <p><strong> Central Government Debt: </strong>{formatted_cgDebt}</p>
+        <p><strong> GG Debt: </strong>{formatted_ggDebt}</p>
+        <p><strong> CG Debt: </strong>{formatted_cgDebt}</p>
       </div>
       <DebtChart
         countryCode={selectedCountryCode}
         centralGovDebt={centralGovDebt}
         publicDebt={publicDebt}
       />
-      {/*<p>
-        This graph shows {selectedCountry ? selectedCountry.name : 'the selected country'}´s public debt as a percentage of GDP for each year, alongside the total public debt as a percentage of GDP over the same period. Both data sets provide insights into the relative size of government debt compared to the country´s economy.
-        An increase in debt may indicate the government is borrowing more to finance public services or economic stimulus, while a decrease could reflect economic growth and reduced borrowing needs.
-        A rising debt-to-GDP ratio, combined with increases in total debt as a percentage of GDP, could raise concerns about the government´s ability to respond to future economic challenges and maintain fiscal sustainability.
-      </p>*/}
+      <p>
+        This graph shows {selectedCountry ? selectedCountry.name : 'the selected country'}´s public debt as a percentage of GDP for each year, alongside the total public debt as a percentage of GDP over the same period.<br /> Both data sets provide insights into the relative size of government debt compared to the country´s economy:<br />
+      </p>
+      <ul>
+        <li>An increase in debt may indicate the government is borrowing more to finance public services or economic stimulus, while a decrease could reflect economic growth and reduced borrowing needs.</li>
+        <li>A rising debt-to-GDP ratio, combined with increases in total debt as a percentage of GDP, could raise concerns about the government´s ability to respond to future economic challenges and maintain fiscal sustainability.</li>
+      </ul>
     </div>
   )
 }
