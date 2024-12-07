@@ -53,6 +53,7 @@ import { getGGDebtData } from '../services/publicDebtService.js'
  */
 var cgDebtHeatmapLayer = null
 var ggDebtHeatmapLayer = null
+let selectedLayer = null
 
 /**
  * Apply heatmap style based on the country's debt.
@@ -114,12 +115,30 @@ function getColor(d) {
                   'black'
 }
 
+function highlightSelectedFeature(e) {
+  var layer = e.target
+  layer.setStyle({
+    weight: 3,
+    fillColor: '#fff',
+    color: 'black',
+    fillOpacity: 0.3,
+  })
+
+  layer.bringToFront()
+}
+
 /**
  * Highlight function to style the selected country
  * @param {*} e
  */
 function highlightFeatureHeatmap(e) {
   var layer = e.target
+  if (layer === selectedLayer) {
+    layer.setStyle({
+      weight: 5,
+    })
+    return
+  }
 
   layer.setStyle({
     weight: 5,
@@ -186,10 +205,30 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
-      highlightFeatureHeatmap({ target: layer })
+      if (selectedLayer) {
+        resetHighlight({ target: selectedLayer })
+      }
+
+      if (selectedLayer === layer) {
+        selectedLayer = null
+        setSelectedCountry(null)
+        setInfoVisible(false)
+        setSelectedCountryCode(null)
+        return
+      }
+
+      highlightSelectedFeature({ target: layer })
+      selectedLayer = layer
     },
     mouseover: highlightFeatureHeatmap,
-    mouseout: resetHighlight,
+    mouseout: (e) => {
+      if (selectedLayer !== e.target) {
+        resetHighlight(e)
+        if (selectedLayer) selectedLayer.bringToFront()
+      } else {
+        highlightSelectedFeature(e)
+      }
+    },
   })
 }
 
@@ -296,16 +335,30 @@ const MapComponent = ({ year, heatmap }) => {
           console.error('Error setting zoom levels:', err)
         }
 
-        map.on('zoomend', () => {
-          setZoom(map.getZoom())
+        let interacting = false
+        map.on('movestart zoomstart', () => {
+          map.zoomControl.disable()
+          map.scrollWheelZoom.disable()
+          interacting = true
         })
 
-        map.on('moveend', () => {
-          try {
-            setCenter(map.getCenter())
-          } catch (error) {
-            console.error('Error getting map center and zoom:', error)
-          }
+        map.on('zoomend moveend', () => {
+          map.zoomControl.enable()
+          map.scrollWheelZoom.enable()
+          interacting = false
+        })
+
+        map.whenReady(() => {
+          map.on('someUserEvent', () => {
+            if (!interacting && map._mapPane) {
+              try {
+                setZoom(map.getZoom())
+                setCenter(map.getCenter())
+              } catch (error) {
+                console.error('Error getting map center and zoom:', error)
+              }
+            }
+          })
         })
 
         mapRef.current = map
@@ -337,13 +390,27 @@ const MapComponent = ({ year, heatmap }) => {
           onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
             setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false, setZoom, setCenter)
         }).addTo(map)
+
+        if (selectedCountryCode && !loading) {
+          const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+          const layer = layers.find(
+            (l) => l.feature.properties && l.feature.properties.gu_a3 === selectedCountryCode
+          )
+
+          if (layer) {
+            highlightSelectedFeature({ target: layer })
+            selectedLayer = layer
+          }
+        }
       }
     }
 
     if (heatmap) {
       ggDebtHeatmapLayer.bringToFront()
+      if (selectedLayer) selectedLayer.bringToFront()
     } else {
       cgDebtHeatmapLayer.bringToFront()
+      if (selectedLayer) selectedLayer.bringToFront()
     }
 
     return () => {
@@ -352,7 +419,7 @@ const MapComponent = ({ year, heatmap }) => {
         mapRef.current = null
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, center, zoom])
+  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, center, zoom, selectedCountryCode])
 
   const closeInfoBox = () => {
     try {
@@ -364,9 +431,36 @@ const MapComponent = ({ year, heatmap }) => {
     setInfoVisible(false)
     setSelectedCountry(null)
     setSelectedCountryCode(null)
+
+    if (selectedLayer) {
+      if (heatmap) {
+        ggDebtHeatmapLayer.resetStyle(selectedLayer)
+      } else {
+        cgDebtHeatmapLayer.resetStyle(selectedLayer)
+      }
+      selectedLayer = null
+    }
   }
 
   const handleCountrySelect = (country, countryCode) => {
+
+    if (selectedLayer) {
+      if (heatmap) {
+        ggDebtHeatmapLayer.resetStyle(selectedLayer)
+      } else {
+        cgDebtHeatmapLayer.resetStyle(selectedLayer)
+      }
+    }
+
+    const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+    const layer = layers.find(
+      (l) => l.feature.properties && l.feature.properties.gu_a3 === countryCode
+    )
+
+    if (layer) {
+      highlightSelectedFeature({ target: layer })
+      selectedLayer = layer
+    }
     setSelectedCountry(country)
     setSelectedCountryCode(countryCode)
     setInfoVisible(true)
