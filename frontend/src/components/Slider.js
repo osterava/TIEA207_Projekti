@@ -43,7 +43,7 @@ const Slider = ({ year, setYear, heatmap, setHeatmap }) => {
         <span>{max}</span>
       </div>
       <div id="buttonWrapper">
-        <p className='current_debt'>{heatmap ? 'General government debt' : 'Central government debt'}</p>
+        <p className={heatmap ? 'current_debt heatmapOn' : 'current_debt heatmapOff'}>{heatmap ? 'General government debt' : 'Central government debt'}</p>
         <div id="yearButtons">
           <button onClick={decrementYear}>-</button>
           <span style={{ margin: '0 1vw' }}>{year}</span>

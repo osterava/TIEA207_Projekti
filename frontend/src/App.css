@@ -100,10 +100,60 @@ body, html, #root {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
 }
 
 #slider {
   width: 50%;
+}
+
+input[type="range"] {
+  -webkit-appearance: none; /* Reset default styling for WebKit browsers */
+  -moz-appearance: none;    /* Reset default styling for Firefox */
+  appearance: none;         /* Reset default styling for modern browsers */
+  width: 100%;              /* Ensure full width */
+  height: 8px;              /* Set a consistent track height */
+  margin: 10px 0;
+  background: transparent;  /* Make background transparent initially */
+  outline: none;            /* Remove focus outline */
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: linear-gradient(to right, rgb(30, 154, 255) var(--percent, 87%), rgb(255, 77, 77) var(--percent, 13%));
+  border-radius: 4px;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: linear-gradient(to right, rgb(30, 154, 255) var(--percent, 87%), rgb(255, 77, 77) var(--percent, 13%));
+  border-radius: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -4px; /* Align thumb with track */
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+input[type="range"]::-ms-thumb {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 #buttonWrapper {
@@ -120,6 +170,15 @@ body, html, #root {
   border-radius: 10px;
   border: 2px solid black;
   height: fit-content;
+  width: 230px;
+}
+
+.heatmapOn {
+  background-color: rgba(75, 192, 192, 1);
+}
+
+.heatmapOff {
+  background-color: rgba(255, 99, 132, 1);
 }
 
 #yearButtons {
@@ -142,12 +201,23 @@ body, html, #root {
   border: none;
   border-radius: 5px;
   padding: 10px;
+  width: 150px;
 }
 
 #yearButtons button:hover {
   background-color: #e2e2e2;
 }
 
+/*Map Component*/
+
+#mapContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  position: relative;
+  margin: 5px 0;
+}
 /* InfoBox */
 
 #info-box {
@@ -214,17 +284,6 @@ li {
   min-height: 250px;
 }
 
-/*Map Component*/
-
-#mapContainer {
-  flex: 1;
-  display: flex;
-  flex-direction: column-reverse;
-  width: 100%;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  position: relative;
-}
 
 /*Map*/
 
@@ -409,7 +468,7 @@ input:focus {
   #mapContainer {
     flex-direction: row-reverse;
     height: 100%;
-    max-height: 643px !important;
+    max-height: 65% !important;
     transition: none !important;
   }
 
