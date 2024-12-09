@@ -14,9 +14,9 @@ const Header = ({ year, setYear, heatmap, setHeatmap }) => {
 
   return (
     <header className='header'>
-      <div id="header-top-row">
-        <h1 onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)}>DebtMap</h1>
-        <p onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)} className={hover ? 'show-header-desc' : 'hide-header-desc'} >
+      <div id="header-top-row" onMouseOver={() => setHover(true)} onMouseOut={() => setHover(false)}>
+        <h1>DebtMap</h1>
+        <p className={hover ? 'show-header-desc' : 'hide-header-desc'} >
           Explore and visualize global economic data including: general government debt (GG), central government debt (CG), population,
           and gross domestic product (GDP). Data is sourced from the reliable <a href="https://www.imf.org/external/datamapper/api/" target="_blank" rel="noopener noreferrer">
           IMF Open Data API
