@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react'
 /**
  * Leaflet library for interactive maps and required CSS for styling.
 */
-import L from 'leaflet'
+import L, { map } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 /**
@@ -196,12 +196,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
 
       setSelectedCountry(feature.properties)
       setInfoVisible(true)
-      try {
-        setZoom(mapRef.current.getZoom())
-        setCenter(mapRef.current.getCenter())
-      } catch (error) {
-        console.error('Error getting map center and zoom:', error)
-      }
       const countryCode = feature.properties.gu_a3
       setSelectedCountryCode(countryCode)
 
@@ -302,109 +296,110 @@ const MapComponent = ({ year, heatmap }) => {
     fetchData()
   }, [loading])
 
+  const isUpdating = useRef(false)
   useEffect(() => {
     if (loading) return
-
-    /**
-     * Reset highlight style
-     * @param {*} e
-     */
-    function resetHighlight(e) {
-      if (!heatmap) cgDebtHeatmapLayer.resetStyle(e.target)
-      else ggDebtHeatmapLayer.resetStyle(e.target)
-    }
-
-    if (mapRef.current === null) {
+    console.log('UseEffect 2')
+    if (!mapRef.current) {
       const mapElement = document.getElementById('map')
       const southWest = L.latLng(-89.98155760646617, -200)
       const northEast = L.latLng(89.99346179538875, 200)
       const bounds = L.latLngBounds(southWest, northEast)
       const legend = L.control({ position: 'bottomright' })
 
-      if (mapElement) {
-        const map = L.map(mapElement, { attributionControl:false }).setView(center, zoom)
-        L.control.attribution({
-          position: 'bottomleft',
-        }).addTo(map)
+      mapRef.current = L.map(mapElement, { attributionControl:false }).setView([40, 5], 3)
+      L.control.attribution({
+        position: 'bottomleft',
+      }).addTo(mapRef.current)
 
-        try {
-          map.setMaxZoom(6)
-          map.setMinZoom(2)
-          map.setMaxBounds(bounds)
-        } catch (err) {
-          console.error('Error setting zoom levels:', err)
+      try {
+        mapRef.current.setMaxZoom(6)
+        mapRef.current.setMinZoom(2)
+        mapRef.current.setMaxBounds(bounds)
+      } catch (err) {
+        console.error('Error setting zoom levels:', err)
+      }
+
+      mapRef.current.on('zoomend', () => {
+        if (isUpdating.current) return
+        const _zoom = mapRef.current.getZoom()
+        setZoom(_zoom)
+      })
+      mapRef.current.on('moveend', () => {
+        if (isUpdating.current) return
+        const _center = mapRef.current.getCenter()
+        setCenter(_center)
+      })
+
+      legend.onAdd = () => {
+        let div = L.DomUtil.create('div', 'info legend'),
+          grades = [0, 10, 25, 40, 55, 70, 85, 100]
+        div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data<br />'
+        // Get colors for the intervals
+        for (let i = 0; i < grades.length; i++) {
+          div.innerHTML +=
+          '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+          grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
         }
+        return div
+      }
+      legend.addTo(mapRef.current)
 
-        let interacting = false
-        map.on('movestart zoomstart', () => {
-          map.zoomControl.disable()
-          map.scrollWheelZoom.disable()
-          interacting = true
-        })
-
-        map.on('zoomend moveend', () => {
-          map.zoomControl.enable()
-          map.scrollWheelZoom.enable()
-          interacting = false
-        })
-
-        map.whenReady(() => {
-          map.on('someUserEvent', () => {
-            if (!interacting && map._mapPane) {
-              try {
-                setZoom(map.getZoom())
-                setCenter(map.getCenter())
-              } catch (error) {
-                console.error('Error getting map center and zoom:', error)
-              }
-            }
-          })
-        })
-
-        mapRef.current = map
-
-        // Create and add legend to the map using leaflet's DomUtil
-        legend.onAdd = () => {
-          let div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 10, 25, 40, 55, 70, 85, 100]
-          div.innerHTML = '<h4>Debt % per GDP</h4> <i style="background: black"></i> No data<br />'
-          // Get colors for the intervals
-          for (let i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+')
-          }
-          return div
-        }
-        legend.addTo(map)
-
-        ggDebtHeatmapLayer = L.geoJson(countries, {
-          style: (feature) => applyHeatmapStyle(feature, year, true),
-          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, publicDebtData, mapRef, resetHighlight, true, setZoom, setCenter)
-        }).addTo(map)
-
-        // Add GeoJSON layer with event handling
-        cgDebtHeatmapLayer = L.geoJson(countries, {
-          style: (feature) => applyHeatmapStyle(feature, year, false),
-          onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-            setSelectedCountryCode, centralGovernmentDebtData, mapRef, resetHighlight, false, setZoom, setCenter)
-        }).addTo(map)
-
-        if (selectedCountryCode && !loading) {
-          const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
-          const layer = layers.find(
-            (l) => l.feature.properties && l.feature.properties.gu_a3 === selectedCountryCode
-          )
-
-          if (layer) {
-            highlightSelectedFeature({ target: layer })
-            selectedLayer = layer
-          }
+      return () => {
+        if (mapRef.current) {
+          mapRef.current.remove()
+          mapRef.current = null
         }
       }
     }
+  },[loading]) //Only run once
 
+  /**
+   * Reset highlight style
+   * @param {*} e
+   */
+  function resetHighlight(e) {
+    if (!heatmap) cgDebtHeatmapLayer.resetStyle(e.target)
+    else ggDebtHeatmapLayer.resetStyle(e.target)
+  }
+
+  const memoizedResetHighlight = React.useCallback(resetHighlight, [heatmap])
+
+  useEffect(() => {
+    if (loading || !mapRef.current) return
+    isUpdating.current = true
+    console.log('UseEffect center and zoom')
+    mapRef.current.setView(center, zoom)
+    isUpdating.current = false
+  }, [center, zoom, loading])
+
+  useEffect(() => {
+    if (!mapRef.current) return
+    mapRef.current.invalidateSize()
+  }, [infoVisible])
+
+  useEffect(() => {
+    if (loading || !mapRef.current) return
+    console.log('UseEffect layers')
+
+    ggDebtHeatmapLayer = L.geoJson(countries, {
+      style: (feature) => applyHeatmapStyle(feature, year, true),
+      onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+        setSelectedCountryCode, publicDebtData, mapRef, memoizedResetHighlight, true, setZoom, setCenter)
+    }).addTo(mapRef.current)
+
+    // Add GeoJSON layer with event handling
+    cgDebtHeatmapLayer = L.geoJson(countries, {
+      style: (feature) => applyHeatmapStyle(feature, year, false),
+      onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
+        setSelectedCountryCode, centralGovernmentDebtData, mapRef, memoizedResetHighlight, false, setZoom, setCenter)
+    }).addTo(mapRef.current)
+  }, [centralGovernmentDebtData, loading, memoizedResetHighlight, publicDebtData, year])
+
+  // Heatmap useEffect
+  useEffect(() => {
+    if (!mapRef.current) return
+    console.log('UseEffect heatmap')
     if (heatmap) {
       ggDebtHeatmapLayer.bringToFront()
       if (selectedLayer) selectedLayer.bringToFront()
@@ -412,14 +407,30 @@ const MapComponent = ({ year, heatmap }) => {
       cgDebtHeatmapLayer.bringToFront()
       if (selectedLayer) selectedLayer.bringToFront()
     }
-
     return () => {
-      if (mapRef.current !== null) {
-        mapRef.current.remove()
-        mapRef.current = null
+      if (mapRef.current) {
+        mapRef.current.removeLayer(cgDebtHeatmapLayer)
+        mapRef.current.removeLayer(ggDebtHeatmapLayer)
       }
     }
-  }, [loading,publicDebtData, year, heatmap, populationData, gdpData, centralGovernmentDebtData, center, zoom, selectedCountryCode])
+  }, [heatmap, loading, year])
+
+  // Selected country useEffect
+  useEffect(() => {
+    if (!mapRef.current) return
+    console.log('UseEffect selected country')
+    if (selectedCountryCode) {
+      const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+      const layer = layers.find(
+        (l) => l.feature.properties && l.feature.properties.gu_a3 === selectedCountryCode
+      )
+
+      if (layer) {
+        highlightSelectedFeature({ target: layer })
+        selectedLayer = layer
+      }
+    }
+  }, [selectedCountryCode, heatmap])
 
   const closeInfoBox = () => {
     try {
@@ -466,12 +477,13 @@ const MapComponent = ({ year, heatmap }) => {
     setInfoVisible(true)
   }
 
+
   const handleMouseEnter = () => {
-    mapRef.current.scrollWheelZoom.disable()
+    if(mapRef.current._mapPane) mapRef.current.scrollWheelZoom.disable()
   }
 
   const handleMouseLeave = () => {
-    mapRef.current.scrollWheelZoom.enable()
+    if(mapRef.current._mapPane) mapRef.current.scrollWheelZoom.enable()
   }
 
 
