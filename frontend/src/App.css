@@ -590,6 +590,9 @@ input:focus {
     width: 100% !important;
     text-wrap: wrap !important;
   }
+  .legend i {
+    opacity: 0.7;
+  }
 }
 
 /* For Mobile Landscape View */
@@ -621,5 +624,4 @@ input:focus {
   height: 18px;
   float: left;
   margin-right: 8px;
-  opacity: 0.7;
 }
