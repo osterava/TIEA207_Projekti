@@ -121,7 +121,7 @@ function highlightSelectedFeature(e) {
     weight: 3,
     fillColor: '#fff',
     color: 'black',
-    fillOpacity: 0.3,
+    fillOpacity: 0.2,
   })
 
   layer.bringToFront()
@@ -143,7 +143,7 @@ function highlightFeatureHeatmap(e) {
   layer.setStyle({
     weight: 5,
     fillColor: '#fff',
-    fillOpacity: 0.3,
+    fillOpacity: 0.2,
   })
 
   layer.bringToFront()
@@ -187,7 +187,6 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
       // Liikaa erroreita konsoliin: console.error('Debt data not available for country', feature.properties.gu_a3)
     }
   }
-
 
   layer.on({
     click: () => {
@@ -234,6 +233,7 @@ function heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setS
  * @param {boolean} props.heatmap - Flag to toggle heatmap visualization.
  */
 const MapComponent = ({ year, heatmap }) => {
+  const [loading, setLoading] = useState(true)
   const [publicDebtData, setPublicDebtData] = useState(null)
   const [populationData, setPopulationData] = useState(null)
   const [gdpData, setGDPData] = useState(null)
@@ -241,10 +241,8 @@ const MapComponent = ({ year, heatmap }) => {
   const [infoVisible,   setInfoVisible] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCountryCode, setSelectedCountryCode] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [center, setCenter] = useState([40, 5])
   const [zoom, setZoom] = useState(3)
-
   const mapRef = useRef(null)
 
   /**
@@ -255,9 +253,13 @@ const MapComponent = ({ year, heatmap }) => {
     if (!loading) return
     const fetchData = async () => {
       try {
+        const cgDebtData = await getCGDebtData()
+        var data = cgDebtData.values.CG_DEBT_GDP
+        setCentralGovernmentDebtData(data)
+        console.log('Central government debt data:', data)
 
         const ggDebtData1 = await getPublicDebtData()
-        var data = ggDebtData1.values.GGXWDG_NGDP
+        data = ggDebtData1.values.GGXWDG_NGDP
         console.log(data)
 
         const ggDebtData2 = await getGGDebtData()
@@ -281,11 +283,6 @@ const MapComponent = ({ year, heatmap }) => {
         setGDPData(data)
         console.log('GDP data:', data)
 
-        const cgDebtData = await getCGDebtData()
-        data = cgDebtData.values.CG_DEBT_GDP
-        setCentralGovernmentDebtData(data)
-        console.log('Central government debt data:', data)
-
         setLoading(false)
       } catch (err) {
         console.error(err)
@@ -294,7 +291,7 @@ const MapComponent = ({ year, heatmap }) => {
     }
 
     fetchData()
-  }, [loading])
+  }, [loading]) //Only run once
 
   const isUpdating = useRef(false)
   useEffect(() => {
@@ -344,7 +341,6 @@ const MapComponent = ({ year, heatmap }) => {
         return div
       }
       legend.addTo(mapRef.current)
-
       return () => {
         if (mapRef.current) {
           mapRef.current.remove()
@@ -364,6 +360,12 @@ const MapComponent = ({ year, heatmap }) => {
   }
 
   const memoizedResetHighlight = React.useCallback(resetHighlight, [heatmap])
+  const memoizedHighlightFeatureHeatmap = React.useCallback((feature, layer) => {
+    return heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible, setSelectedCountryCode, heatmap ? publicDebtData : centralGovernmentDebtData, mapRef, memoizedResetHighlight, heatmap, setZoom, setCenter)
+  }, [memoizedResetHighlight, publicDebtData, heatmap, centralGovernmentDebtData])
+  const memoizedHeatmapStyle = React.useCallback((feature) => {
+    return applyHeatmapStyle(feature, year, heatmap)
+  }, [year, heatmap])
 
   useEffect(() => {
     if (loading || !mapRef.current) return
@@ -375,45 +377,40 @@ const MapComponent = ({ year, heatmap }) => {
 
   useEffect(() => {
     if (!mapRef.current) return
+    console.log('UseEffect infoVisible')
     mapRef.current.invalidateSize()
   }, [infoVisible])
 
   useEffect(() => {
     if (loading || !mapRef.current) return
     console.log('UseEffect layers')
-
+    mapRef.current.eachLayer((layer) => {
+      if (layer !== mapRef.current) {
+        mapRef.current.removeLayer(layer)
+      }
+    })
     ggDebtHeatmapLayer = L.geoJson(countries, {
-      style: (feature) => applyHeatmapStyle(feature, year, true),
-      onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-        setSelectedCountryCode, publicDebtData, mapRef, memoizedResetHighlight, true, setZoom, setCenter)
+      style: memoizedHeatmapStyle,
+      onEachFeature: memoizedHighlightFeatureHeatmap
     }).addTo(mapRef.current)
-
-    // Add GeoJSON layer with event handling
+    ggDebtHeatmapLayer.setStyle(memoizedHeatmapStyle)
     cgDebtHeatmapLayer = L.geoJson(countries, {
-      style: (feature) => applyHeatmapStyle(feature, year, false),
-      onEachFeature: (feature, layer) => heatmapFeature(feature, layer, setSelectedCountry, setInfoVisible,
-        setSelectedCountryCode, centralGovernmentDebtData, mapRef, memoizedResetHighlight, false, setZoom, setCenter)
+      style: memoizedHeatmapStyle,
+      onEachFeature: memoizedHighlightFeatureHeatmap
     }).addTo(mapRef.current)
-  }, [centralGovernmentDebtData, loading, memoizedResetHighlight, publicDebtData, year])
+    cgDebtHeatmapLayer.setStyle(memoizedHeatmapStyle)
+  }, [heatmap, loading, memoizedHeatmapStyle, memoizedHighlightFeatureHeatmap])
 
   // Heatmap useEffect
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapRef.current || loading) return
     console.log('UseEffect heatmap')
     if (heatmap) {
       ggDebtHeatmapLayer.bringToFront()
-      if (selectedLayer) selectedLayer.bringToFront()
     } else {
       cgDebtHeatmapLayer.bringToFront()
-      if (selectedLayer) selectedLayer.bringToFront()
     }
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.removeLayer(cgDebtHeatmapLayer)
-        mapRef.current.removeLayer(ggDebtHeatmapLayer)
-      }
-    }
-  }, [heatmap, loading, year])
+  }, [heatmap, year, loading])
 
   // Selected country useEffect
   useEffect(() => {
@@ -431,6 +428,23 @@ const MapComponent = ({ year, heatmap }) => {
       }
     }
   }, [selectedCountryCode, heatmap])
+
+  // Year useEffect
+  useEffect(() => {
+    if (!mapRef.current || loading) return
+    console.log('UseEffect year')
+    if (selectedCountryCode) {
+      const layers = heatmap ? ggDebtHeatmapLayer.getLayers() : cgDebtHeatmapLayer.getLayers()
+      const layer = layers.find(
+        (l) => l.feature.properties && l.feature.properties.gu_a3 === selectedCountryCode
+      )
+
+      if (layer) {
+        highlightSelectedFeature({ target: layer })
+        selectedLayer = layer
+      }
+    }
+  },[year, loading, selectedCountryCode, heatmap])
 
   const closeInfoBox = () => {
     try {
@@ -479,13 +493,14 @@ const MapComponent = ({ year, heatmap }) => {
 
 
   const handleMouseEnter = () => {
-    if(mapRef.current._mapPane) mapRef.current.scrollWheelZoom.disable()
+    if (!mapRef.current) return
+    mapRef.current.scrollWheelZoom.disable()
   }
 
   const handleMouseLeave = () => {
-    if(mapRef.current._mapPane) mapRef.current.scrollWheelZoom.enable()
+    if (!mapRef.current) return
+    mapRef.current.scrollWheelZoom.enable()
   }
-
 
   if (loading) {
     return <div style={{ justifyContent: 'center', display: 'flex', margin: '3vh' }}><strong>Loading map...</strong></div>

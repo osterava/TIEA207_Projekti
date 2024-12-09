@@ -17,6 +17,7 @@ const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
     if (searchRef.current && !searchRef.current.contains(event.target)) {
       setShowSuggestions(false)
     }
+    onMouseLeave()
   }
 
   const handleSuggestionClick = (country) => {
@@ -24,6 +25,7 @@ const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
     onCountrySelect(country.properties, countryCode)
     setSearch('')
     setShowSuggestions(false)
+    onMouseLeave
   }
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [])
+  })
 
   useEffect(() => {
     if (search !== '') {
@@ -45,7 +47,7 @@ const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
   }, [search])
 
   return (
-    <div className="search" ref={searchRef} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div className="search" ref={searchRef} onMouseOver={onMouseEnter} onMouseOut={onMouseLeave}>
       <div className="searchWrapper">
         <div className="inputWrapper">
           <FaSearch className="searchIcon" />

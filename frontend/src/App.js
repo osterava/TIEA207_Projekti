@@ -3,7 +3,6 @@ import MapComponent from './components/MapComponent.js'
 import Footer from './components/footer.js'
 import Header from './components/header.js'
 import './App.css'
-import Search from './components/search.js'
 
 /**
  * The main App component that serves as the entry point of the application.
@@ -23,10 +22,7 @@ const App = () => {
         setYear={setYear}
         heatmap={heatmap}
         setHeatmap={setHeatmap}
-      />{/*
-        <Search
-          year={year}
-      />*/}
+      />
       <MapComponent
         year={year}
         heatmap={heatmap}

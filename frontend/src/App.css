@@ -294,6 +294,7 @@ li {
   height: 100%;
   border: 3px solid black;
   position: relative;
+  background: rgb(108, 204, 236);
 }
 
 /* Search */
@@ -543,6 +544,9 @@ input:focus {
   p {
     font-size: 12px !important;
   }
+  li {
+    font-size: 12px !important;
+  }
   h1 {
     font-size: 2rem !important;
   }
@@ -590,6 +594,9 @@ input:focus {
     width: 100% !important;
     text-wrap: wrap !important;
   }
+  .legend i {
+    opacity: 0.7;
+  }
 }
 
 /* For Mobile Landscape View */
@@ -621,5 +628,4 @@ input:focus {
   height: 18px;
   float: left;
   margin-right: 8px;
-  opacity: 0.7;
 }
