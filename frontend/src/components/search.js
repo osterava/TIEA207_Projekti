@@ -38,7 +38,7 @@ const Search = ({ onCountrySelect, onMouseEnter, onMouseLeave }) => {
   useEffect(() => {
     if (search !== '') {
       const newFilterData = countriesData.features.filter((country) =>
-        country.properties.name.toLowerCase().contains(search.toLowerCase())
+        country.properties.name.toLowerCase().includes(search.toLowerCase())
       )
       setSearchData(newFilterData)
     } else {
