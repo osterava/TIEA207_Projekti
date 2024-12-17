@@ -1,6 +1,6 @@
 # TIEA207 Projekti
 
-[Tuntikirjaus]([https://tiea207-projekti-2024.onrender.com/](https://docs.google.com/spreadsheets/d/1KKIcUJahk7tKaPDT_9UPjhjy8I87RfBuiqUZFHOD8b8/edit?gid=0#gid=0)
+Tuntikirjaus: (https://docs.google.com/spreadsheets/d/1KKIcUJahk7tKaPDT_9UPjhjy8I87RfBuiqUZFHOD8b8/edit?gid=0#gid=0)
 
 Tervetuloa TIEA207 Projektikurssin repositoryyn!
 ----------------------------------------------------------------------------------------------------------------------
